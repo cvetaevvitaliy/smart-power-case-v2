@@ -1,4 +1,4 @@
-# smart-power-case-v2
+# Smart power case v2
 
 Second version Smart power case for FatShark, Skyzone, DJI fpv goggles
 
