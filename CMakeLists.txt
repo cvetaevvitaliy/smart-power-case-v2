@@ -2,6 +2,34 @@ SET(CMAKE_SYSTEM_NAME Generic)
 SET(CMAKE_SYSTEM_VERSION 1)
 cmake_minimum_required(VERSION 3.7)
 
+####################################################################################################
+# Software version
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 0)
+set(VERSION_PATCH 1)
+
+set(VERSION_FW "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
+add_definitions(-DMINOR=\"${VERSION_MAJOR}\")
+add_definitions(-DMAJOR=\"${VERSION_MINOR}\")
+add_definitions(-DPATCH=\"${VERSION_PATCH}\")
+
+####################################################################################################
+# Get git hash ang git branch name (please use definition in project GIT_HASH & GIT_BRANCH)
+
+# Git branch name
+execute_process(COMMAND git rev-parse --abbrev-ref HEAD COMMAND cut -c1-10 OUTPUT_VARIABLE GIT_BRANCH)
+string(STRIP ${GIT_BRANCH} GIT_BRANCH)
+message(STATUS "Git branch - ${GIT_BRANCH}")
+add_definitions(-DGIT_BRANCH=\"${GIT_BRANCH}\")
+
+# Git hash
+execute_process(COMMAND git rev-parse --short=8 HEAD OUTPUT_VARIABLE GIT_HASH)
+string(STRIP ${GIT_HASH} GIT_HASH)
+message(STATUS "Git hash - ${GIT_HASH}")
+add_definitions(-DGIT_HASH=\"${GIT_HASH}\")
+
+####################################################################################################
+
 # specify cross compilers and tools
 SET(CMAKE_C_COMPILER_WORKS 1)
 SET(CMAKE_C_COMPILER arm-none-eabi-gcc)
@@ -113,13 +141,19 @@ endif()
 add_executable(${PROJECT_NAME}.elf ${SOURCES_HAL} ${LINKER_SCRIPT})
 
 set(CMAKE_EXE_LINKER_FLAGS
-        "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}.map" ${FPU_FLAGS})
+        "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}-V${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}-${GIT_HASH}.map" ${FPU_FLAGS})
 
-set(HEX_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.hex)
-set(BIN_FILE ${PROJECT_BINARY_DIR}/${PROJECT_NAME}.bin)
+SET(HEX_FILE ${PROJECT_BINARY_DIR}/firmware-v${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}-${GIT_HASH}.hex)
+SET(BIN_FILE ${PROJECT_BINARY_DIR}/firmware-v${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}-${GIT_HASH}.bin)
 
 add_custom_command(TARGET ${PROJECT_NAME}.elf POST_BUILD
+        COMMAND arm-none-eabi-size --format=berkeley ${PROJECT_NAME}.elf
         COMMAND ${CMAKE_OBJCOPY} -Oihex $<TARGET_FILE:${PROJECT_NAME}.elf> ${HEX_FILE}
         COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
-        COMMENT "Building ${HEX_FILE}
-Building ${BIN_FILE}")
+        COMMENT "Building done, output files:
+${HEX_FILE}
+${BIN_FILE}
+File details, format berkeley:")
+
+add_custom_target(flash
+        COMMAND dfu-util -a 0 -s 0x08000000:leave -D ${BIN_FILE} -w)
