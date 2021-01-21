@@ -41,4 +41,8 @@
 #define INT1_ACC_GPIO_PORT GPIOB
 #define INT1_ACC_EXTI_IRQn EXTI9_5_IRQn
 
+#define MAGIC_DFU_VALUE (0x1AAA)
+#define TAPER_CURRENT              150      // Current cut-off charging for BQ25895 and BQ27441
+#define MAX_VOLTAGE_LIION          4200     // Max charge voltage for battery
+
 #endif //SMART_POWER_CASE_V2_DEVICE_CONFIG_H

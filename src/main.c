@@ -1,14 +1,14 @@
 #include "main.h"
-#include "stm32_init.h"
-
+#include "service.h"
 
 
 int main(void)
 {
-    Init_Hardware();
+    Services_Init();
 
     while (1){
 
+        Services_Loop();
 
     }
 
