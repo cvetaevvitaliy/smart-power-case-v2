@@ -88,14 +88,16 @@ file(GLOB_RECURSE SOURCES_HAL
         "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c"
         "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c"
         "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c"
+        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc.c"
+        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc_ex.c"
 
         "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/*.c"
         "src/stm32_device_library/STM32_USB_Device_Library/Class/CDC/Src/*.c"
         "src/stm32_device_library/STM32_USB_Device_Library/Core/Src/*.*"
 
-        "src/device/hal_config/system_stm32f4xx.c"
-        "src/device/hal_config/stm32f4xx_hal_msp.c"
-        "src/device/hal_config/stm32f4xx_it.c"
+        "src/device/stm32_hal_config/system_stm32f4xx.c"
+        "src/device/stm32_hal_config/stm32f4xx_hal_msp.c"
+        "src/device/stm32_hal_config/stm32f4xx_it.c"
 
         "src/device/usbd/usb_device.c"
         "src/device/usbd/usbd_desc.c"
@@ -103,7 +105,35 @@ file(GLOB_RECURSE SOURCES_HAL
         "src/device/usbd/usbd_conf.c"
         "src/device/usbd/usbd_desc.c"
 
-        "src/device/init/stm32_init.c"
+        "src/components/dfu/dfu.c"
+
+        "src/device/stm32_init/stm32_init.c"
+        "src/device/stm32_init/charger.c"
+        "src/components/bq25895/bq2589x_charger.c"
+
+        "src/components/bq27441/bq27441.c"
+
+        "src/components/cli/lib/cli_input.c"
+        "src/components/cli/lib/cli_log.c"
+        "src/components/cli/lib/cli_queue.c"
+        "src/components/cli/lib/cli_time.c"
+        "src/components/cli/cli.c"
+        "src/components/cli/cli_io.c"
+        "src/components/cli/ulog/ulog.c"
+        "src/components/tinyprintf/tinyprintf.c"
+        "src/components/tinystring/tinystring.c"
+
+        "src/device/battery/battery.c"
+        "src/device/button/button.c"
+        "src/device/display/display.c"
+        "src/device/power/power.c"
+        "src/device/service/service.c"
+
+        "src/components/st7735s/st7735s.c"
+        "src/components/st7735s/st7735s_spi.c"
+        "src/components/st7735s/fonts/*.*"
+        "src/components/st7735s/picts/*.*"
+
 
         "src/main.c")
 
@@ -117,10 +147,31 @@ include_directories(
         src/stm32_device_library/STM32F4xx_HAL_Driver/Inc
         src/stm32_device_library/STM32F4xx_HAL_Driver/Inc/Legacy
 
-        src/device/hal_config
+        src/device/stm32_hal_config
         src/device/usbd
 
-        src/device/init
+        src/components/dfu
+
+        src/components/tinystring
+        src/components/tinyprintf
+        src/components/cli/lib
+        src/components/cli/ulog
+        src/components/cli
+
+        src/device/stm32_init
+
+        src/components/bq25895
+        src/components/bq27441
+
+        src/device/battery
+        src/device/button
+        src/device/display
+        src/device/power
+        src/device/service
+
+        src/components/st7735s
+        src/components/st7735s/fonts
+        src/components/st7735s/picts
 
         src)
 
@@ -128,6 +179,7 @@ include_directories(
 
 
 add_definitions(-DBUILD_NAME=\"Smart\ power\ V2\")
+add_definitions(-DCLI -DDEBUG)
 
 #_WHERE_BUILD
 if (_WHERE_BUILD STREQUAL Cloud)

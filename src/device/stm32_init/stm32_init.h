@@ -2,7 +2,7 @@
 #define SMART_POWER_CASE_V2_STM32_INIT_H
 #include "stm32f4xx.h"
 
-void Init_Hardware(void);
+void STM32_Init(void);
 
 void USB_Reset(void);
 

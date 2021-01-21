@@ -1,5 +1,6 @@
 #include "stm32_init.h"
 #include "usb_device.h"
+#include "dfu.h"
 
 ADC_HandleTypeDef hadc1;
 DMA_HandleTypeDef hdma_adc1;
@@ -20,6 +21,8 @@ UART_HandleTypeDef huart1;
 DMA_HandleTypeDef hdma_usart1_rx;
 DMA_HandleTypeDef hdma_usart1_tx;
 
+RTC_HandleTypeDef hrtc;
+
 void SystemClock_Config(void);
 void MX_GPIO_Init(void);
 void MX_DMA_Init(void);
@@ -33,13 +36,16 @@ void MX_TIM3_Init(void);
 void MX_TIM10_Init(void);
 void MX_TIM4_Init(void);
 void HAL_TIM_MspPostInit(TIM_HandleTypeDef *htim);
+static void MX_RTC_Init(void);
 
 
-void Init_Hardware(void)
+void STM32_Init(void)
 {
     HAL_Init();
 
     SystemClock_Config();
+    MX_RTC_Init();
+    dfu_check();
 
     MX_GPIO_Init();
     MX_DMA_Init();
@@ -48,7 +54,8 @@ void Init_Hardware(void)
     MX_SPI1_Init();
     MX_TIM1_Init();
     MX_USART1_UART_Init();
-    MX_USB_DEVICE_Init();
+//    USB_Reset();
+//    MX_USB_DEVICE_Init();
     MX_TIM2_Init();
     MX_TIM3_Init();
     MX_TIM10_Init();
@@ -66,17 +73,17 @@ void SystemClock_Config(void)
 
     RCC_OscInitTypeDef RCC_OscInitStruct;
     RCC_ClkInitTypeDef RCC_ClkInitStruct;
+    RCC_PeriphCLKInitTypeDef PeriphClkInitStruct;
 
-    /**Configure the main internal regulator output voltage
-    */
+    /** Configure the main internal regulator output voltage */
     __HAL_RCC_PWR_CLK_ENABLE();
 
     __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
-    /**Initializes the CPU, AHB and APB busses clocks
-    */
-    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+    /** Initializes the CPU, AHB and APB busses clocks */
+    RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSI|RCC_OSCILLATORTYPE_HSE;
     RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+    RCC_OscInitStruct.LSIState = RCC_LSI_ON;
     RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
     RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
     RCC_OscInitStruct.PLL.PLLM = 4;
@@ -88,8 +95,7 @@ void SystemClock_Config(void)
         _Error_Handler(__FILE__, __LINE__);
     }
 
-    /**Initializes the CPU, AHB and APB busses clocks
-    */
+    /** Initializes the CPU, AHB and APB busses clocks */
     RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                                   |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
     RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
@@ -102,12 +108,18 @@ void SystemClock_Config(void)
         _Error_Handler(__FILE__, __LINE__);
     }
 
-    /**Configure the Systick interrupt time
+    PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_RTC;
+    PeriphClkInitStruct.RTCClockSelection = RCC_RTCCLKSOURCE_LSI;
+    if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInitStruct) != HAL_OK)
+    {
+        _Error_Handler(__FILE__, __LINE__);
+    }
+
+    /** Configure the Systick interrupt time
     */
     HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 
-    /**Configure the Systick
-    */
+    /** Configure the Systick */
     HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
     /* SysTick_IRQn interrupt configuration */
@@ -498,7 +510,8 @@ void MX_USART1_UART_Init(void)
 
 }
 
-void USB_Reset(void) {
+void USB_Reset(void)
+{
     GPIO_InitTypeDef GPIO_InitStruct;
 
     GPIO_InitStruct.Pin = GPIO_PIN_10;
@@ -511,5 +524,25 @@ void USB_Reset(void) {
 
     HAL_Delay(200);
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_10);
+
+}
+
+/** RTC init function */
+static void MX_RTC_Init(void)
+{
+
+    /**Initialize RTC Only
+    */
+    hrtc.Instance = RTC;
+    hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
+    hrtc.Init.AsynchPrediv = 127;
+    hrtc.Init.SynchPrediv = 255;
+    hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
+    hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
+    hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
+    if (HAL_RTC_Init(&hrtc) != HAL_OK)
+    {
+        _Error_Handler(__FILE__, __LINE__);
+    }
 
 }
