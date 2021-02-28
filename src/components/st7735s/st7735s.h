@@ -1,9 +1,25 @@
-#ifndef ST7735S_F4_ST7735S_H
-#define ST7735S_F4_ST7735S_H
+/**
+ *     st7735 display library
+ *
+ *     Copyright (c) 2020 Vitaliy Nimych (Cvetaev) @ cvetaevvitaliy@gmail.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef _ST7735S_H
+#define _ST7735S_H
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include "st7735s_spi.h"
 #include "fonts.h"
 #include "picts.h"
 
@@ -66,6 +82,26 @@
 #define ST7735_WHITE   0xFFFF
 //#define ST7735_COLOR565(r, g, b) (((r & 0xF8) << 8) | ((g & 0xFC) << 3) | ((b & 0xF8) >> 3))
 
+typedef uint8_t (*spi_write)(uint8_t *pData, uint16_t Size);
+typedef void (*write_pin)(uint32_t port, uint32_t pin, uint8_t state);
+
+
+typedef struct {
+    uint32_t gpio_port;
+    uint32_t gpio_pin;
+} LCD_ST7735_GPIO_t;
+
+typedef struct {
+    void *handle;
+    spi_write  spi_write_data;
+    write_pin gpio_write_pin;
+    LCD_ST7735_GPIO_t reset;
+    LCD_ST7735_GPIO_t cs;
+    LCD_ST7735_GPIO_t data;
+    LCD_ST7735_GPIO_t backlight;
+} LCD_ST7735_ctx_t;
+
+
 typedef enum {
     LCD_R0,
     LCD_R90,
@@ -74,7 +110,7 @@ typedef enum {
 } LCD_ST7735S_rotation_t;
 
 
-void LCD_ST7735S_Init(void);
+void LCD_ST7735S_Init(LCD_ST7735_ctx_t *data);
 void LCD_ST7735S_SetOrientation(LCD_ST7735S_rotation_t rotation);
 void LCD_ST7735S_Scroll(uint8_t);
 void LCD_ST7735S_ScrollArea(uint8_t x_start, uint8_t x_stop);
@@ -86,10 +122,10 @@ void LCD_ST7735_DrawString(const char *str, int x, int y, const tFont *font, uin
 
 void LCD_ST7735S_Backlight(bool enable);
 void Draw_Bitmap_Mono(int x, int y, const tImage *image, uint16_t color565);
-void LCD_ST7735S_drawRGBBitmap(int16_t x, int16_t y, const tImage_RGB *image);
+void LCD_ST7735S_Draw_RGB_Bitmap(int16_t x, int16_t y, const tImage_RGB *image);
 
 void LCD_ST7735S_Clear(void);
 
 
 
-#endif //ST7735S_F4_ST7735S_H
+#endif //_ST7735S_H

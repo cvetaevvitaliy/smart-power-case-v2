@@ -1,3 +1,5 @@
+#ifndef ST7735S_FONTS_H
+#define ST7735S_FONTS_H
 #include <stdint.h>
 #include "picts.h"
 
@@ -21,3 +23,5 @@ extern const tFont Font_LET_18x26;
 extern const tFont Font_20x24;
 extern const tFont Font_24x17;
 extern const tFont Font_25x27;
+
+#endif //ST7735S_FONTS_H

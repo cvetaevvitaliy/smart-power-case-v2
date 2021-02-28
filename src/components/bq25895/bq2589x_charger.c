@@ -1,36 +1,89 @@
-#include <stdbool.h>
+/**
+ *     BQ25895 I2C 1cell 5A buck battery charger with high input voltage
+ *
+ *     Copyright (c) 2020 Vitaliy Nimych (Cvetaev) @ cvetaevvitaliy@gmail.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 #include "bq2589x_charger.h"
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
 
 
-extern I2C_HandleTypeDef hi2c1;
+static bq2589x_ctx_t ctx = {0};
 
-static uint16_t bq2589x_read_byte(uint8_t *data, uint8_t reg)
+/**
+  * @brief  Read generic device register
+  *
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to read
+  * @param  data  pointer to buffer that store the data read(ptr)
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int16_t bq2589x_read_byte(uint8_t *data, uint8_t reg)
 {
-  
-  if(HAL_I2C_Mem_Read(&hi2c1,BQ25895_ADDR,reg,1,data,1,25)==HAL_OK)
-  {
-    return BQ25895_OK;//TI lib uses 1 as failed
-  }
-  else
-  {
-    return BQ25895_ERR;//TI lib uses 1 as failed
-  }
-  
+    int32_t ret;
+    ret = ctx.read_reg(ctx.bq25895x_i2c_address, data, reg);
+    return ret;
 }
 
 
-static uint16_t bq2589x_write_byte(uint8_t reg, uint8_t data)
+/**
+  * @brief  Write generic device register
+  *
+  * @param  ctx   read / write interface definitions(ptr)
+  * @param  reg   register to write
+  * @param  data  pointer to data to write in register reg(ptr)
+  * @retval       interface status (MANDATORY: return 0 -> no Error)
+  *
+  */
+int16_t bq2589x_write_byte(uint8_t reg, uint8_t *data)
 {
-  
-  if(HAL_I2C_Mem_Write(&hi2c1,BQ25895_ADDR,reg,1,&data,1,25)==HAL_OK)
-  {
-    return BQ25895_OK;//TI lib uses 1 as failed
-  }
-  else
-  {
-    return BQ25895_ERR;//TI lib uses 1 as failed
-  }
+    int32_t ret;
+    ret = ctx.write_reg(ctx.bq25895x_i2c_address, reg, data);
+    return ret;
 }
+
+
+//static uint16_t bq2589x_read_byte(uint8_t *data, uint8_t reg)
+//{
+//
+//  if(HAL_I2C_Mem_Read(&hi2c1,BQ25895_ADDR,reg,1,data,1,25)==HAL_OK)
+//  {
+//    return BQ25895_OK;//TI lib uses 1 as failed
+//  }
+//  else
+//  {
+//    return BQ25895_ERR;//TI lib uses 1 as failed
+//  }
+//
+//}
+//
+//
+//static uint16_t bq2589x_write_byte(uint8_t reg, uint8_t data)
+//{
+//
+//  if(HAL_I2C_Mem_Write(&hi2c1,BQ25895_ADDR,reg,1,&data,1,25)==HAL_OK)
+//  {
+//    return BQ25895_OK;//TI lib uses 1 as failed
+//  }
+//  else
+//  {
+//    return BQ25895_ERR;//TI lib uses 1 as failed
+//  }
+//}
 
 
 static uint16_t bq2589x_update_bits(uint8_t reg, uint8_t mask, uint8_t data)
@@ -46,7 +99,7 @@ static uint16_t bq2589x_update_bits(uint8_t reg, uint8_t mask, uint8_t data)
   tmp &= ~mask;
   tmp |= data & mask;
   
-  return bq2589x_write_byte(reg, tmp);
+  return bq2589x_write_byte(reg, &tmp);
 }
 
 
@@ -532,7 +585,6 @@ uint16_t bq2589x_set_vindpm_offset(int offset)
 }
 
 
-
 /********************************************************************************************************************
  * Charging Status
  * 00 – Not Charging
@@ -555,7 +607,6 @@ uint16_t bq2589x_get_charging_status()
 }
 
 
-
 void bq2589x_set_otg(int enable)
 {
   uint16_t ret;
@@ -569,8 +620,6 @@ void bq2589x_set_otg(int enable)
     ret = bq2589x_disable_otg();
   }
 }
-
-
 
 
 /********************************************************************************************************************
@@ -597,7 +646,6 @@ uint16_t bq2589x_disable_watchdog_timer()
 }
 
 
-
 /********************************************************************************************************************
  * I2C Watchdog Timer Reset
  * Reset (Back to 0 after timer reset)
@@ -608,7 +656,6 @@ uint16_t bq2589x_reset_watchdog_timer()
   
   return bq2589x_update_bits(BQ2589X_REG_03, BQ2589X_WDT_RESET_MASK, val);
 }
-
 
 
 /********************************************************************************************************************
@@ -625,11 +672,10 @@ uint16_t bq2589x_force_dpdm()
   ret = bq2589x_update_bits(BQ2589X_REG_02, BQ2589X_FORCE_DPDM_MASK, val);
   if (ret)
     return ret;
-  HAL_Delay (20); /*TODO: how much time needed to finish dpdm detect*/
+  // delay (20); /*TODO: how much time needed to finish dpdm detect*/
   return BQ25895_OK;
   
 }
-
 
 
 /********************************************************************************************************************
@@ -651,7 +697,6 @@ uint16_t bq2589x_reset_chip()
 }
 
 
-
 /********************************************************************************************************************
  * Force BATFET off to enable ship mode
  * 0 – Allow BATFET turn on (default)   define BQ2589X_BATFET_ON
@@ -670,7 +715,6 @@ uint16_t bq2589x_enter_ship_mode()
 }
 
 
-
 /********************************************************************************************************************
  * Force BATFET off to enable ship mode
  * 0 – Allow BATFET turn on (default)       define BQ2589X_BATFET_ON
@@ -687,7 +731,6 @@ uint16_t bq2589x_exit_ship_mode()
   return ret;
   
 }
-
 
 
 /********************************************************************************************************************
@@ -726,7 +769,6 @@ uint16_t bq2589x_exit_hiz_mode()
 }
 
 
-
 /********************************************************************************************************************
  * Get  HIZ Mode
  * return 0 – Disable
@@ -744,7 +786,6 @@ bool bq2589x_get_hiz_mode(uint8_t *state)
   
   return BQ25895_OK;
 }
-
 
 
 /********************************************************************************************************************
@@ -823,7 +864,6 @@ uint16_t bq2589x_pumpx_decrease_volt()
 }
 
 
-
 /********************************************************************************************************************
  * Current pulse control voltage down done
  *
@@ -848,8 +888,6 @@ uint16_t bq2589x_pumpx_decrease_volt_done()
 }
 
 
-
-
 /********************************************************************************************************************
  * Force Start Input Current Optimizer (ICO)
  * 0 – Do not force ICO (default)
@@ -870,7 +908,6 @@ uint16_t bq2589x_force_ico()
   
   return ret;
 }
-
 
 
 /********************************************************************************************************************
@@ -894,7 +931,6 @@ uint16_t bq2589x_check_force_ico_done()
   else
     return BQ25895_OK;   /* in progress*/
 }
-
 
 
 /********************************************************************************************************************
@@ -922,7 +958,6 @@ uint16_t bq2589x_enable_term(bool enable)
 }
 
 
-
 /********************************************************************************************************************
  * Automatic D+/D- Detection Enable
  * 0 –Disable D+/D- or PSEL detection when VBUS is plugged-in
@@ -947,6 +982,7 @@ uint16_t bq2589x_enable_auto_dpdm(bool enable)
   return ret;
   
 }
+
 
 /********************************************************************************************************************
  * Absolute VINDPM Threshold
@@ -1012,8 +1048,6 @@ uint16_t bq2589x_enable_ico(bool enable)
 }
 
 
-
-
 /********************************************************************************************************************
  * Input Current Limit in effect while Input Current Optimizer
  * (ICO) is enabled
@@ -1037,7 +1071,6 @@ uint16_t bq2589x_read_idpm_limit()
 }
 
 
-
 /********************************************************************************************************************
  * Charging Status
  * 0 – Not Charging
@@ -1057,30 +1090,39 @@ bool bq2589x_is_charge_done()
 }
 
 
-
 /********************************************************************************************************************
  *                                              Common initialization
  *
  *
  * *****************************************************************************************************************/
-uint16_t bq2589x_init_device()
+int16_t bq2589x_init_device(bq2589x_ctx_t *dev)
 {
+    if (dev == NULL)
+        return false;
+
+    ctx.read_reg = dev->read_reg;
+    ctx.write_reg = dev->write_reg;
+    ctx.bq25895x_i2c_address = dev->bq25895x_i2c_address;
+
     bq2589x_part_no BQ25895_type;
     int16_t rev;
 
     if (bq2589x_detect_device(&BQ25895_type, &rev) == BQ25895_OK) {
-        uint16_t ret;
         /*common initialization*/
 
         bq2589x_disable_watchdog_timer();
 
-        ret = bq2589x_set_charge_current(2560); //2.5A
+        bq2589x_set_charge_current(2560); //2.5A
 
-        return true;
-    } else
-        return false;
+        return BQ25895_OK;
+    }
+    else
+    {
+        return BQ25895_ERR;
+    }
 
 }
+
 
 /********************************************************************************************************************
  *                                          Detect device and part number
@@ -1100,7 +1142,6 @@ uint16_t bq2589x_detect_device(bq2589x_part_no* part_no, int16_t * revision)
   }
   return BQ25895_ERR;
 }
-
 
 
 /********************************************************************************************************************
@@ -1141,6 +1182,7 @@ uint16_t bq2589x_enable_max_charge(bool enable)
   return ret;
 }
 
+
 /********************************************************************************************************************
  * IR Compensation Resistor Setting
  * Range: 0 – 140mΩ
@@ -1154,6 +1196,7 @@ uint16_t bq2589x_set_IR_compensation_resistor(int milliohm)
   val = (milliohm - BQ2589X_BAT_COMP_BASE)/BQ2589X_BAT_COMP_LSB;
   return bq2589x_update_bits(BQ2589X_REG_08, BQ2589X_BAT_COMP_MASK, val << BQ2589X_BAT_COMP_SHIFT);
 }
+
 
 /********************************************************************************************************************
  * IR Compensation Voltage Clamp

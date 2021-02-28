@@ -5,12 +5,48 @@
 #include "st7735s.h"
 #include "cli.h"
 
-Power_Status_t Power_status = {0};
+extern I2C_HandleTypeDef hi2c1;
+static Power_Status_t Power_status = {0};
+
+static int16_t _read_byte(uint8_t DevAddress, uint8_t *data, uint8_t reg)
+{
+
+  if(HAL_I2C_Mem_Read(&hi2c1, (uint16_t)DevAddress, reg,1, data,1,25)==HAL_OK)
+  {
+    return BQ25895_OK;
+  }
+  else
+  {
+    return BQ25895_ERR;
+  }
+
+}
+
+static int16_t _write_byte(uint8_t DevAddress, uint8_t reg, uint8_t *data)
+{
+
+  if(HAL_I2C_Mem_Write(&hi2c1, (uint16_t)DevAddress, reg, 1, data, 1, 25) == HAL_OK)
+  {
+    return BQ25895_OK;
+  }
+  else
+  {
+    return BQ25895_ERR;
+  }
+
+}
+
+bq2589x_ctx_t bq2589x =
+        {
+            .write_reg = _write_byte,
+            .read_reg = _read_byte,
+            .bq25895x_i2c_address = BQ25895_ADDR,
+        };
 
 bool Power_InitChargerChip(void)
 {
 
-    if (bq2589x_init_device() == true)
+    if (bq2589x_init_device(&bq2589x) == BQ25895_OK)
     {
         bq2589x_exit_ship_mode();
         bq2589x_exit_hiz_mode();
@@ -58,7 +94,7 @@ void Power_LoopService(void)
             HAL_Delay(200);
             MX_USB_DEVICE_Init();
             LCD_ST7735S_Clear();
-            LCD_ST7735S_drawRGBBitmap(0,0, &usb_to_pc);
+            LCD_ST7735S_Draw_RGB_Bitmap(0, 0, &usb_to_pc);
             LCD_ST7735S_Update();
             HAL_Delay(2000);  /// need this time for reset and reinit USB
             cli_set_first_in_cli(false);
@@ -75,6 +111,13 @@ void Power_LoopService(void)
         HAL_Delay(2000);
         cli_set_first_in_cli(true);
         LCD_ST7735S_Clear();
+        bq2589x_enter_ship_mode();
+        bq2589x_enter_hiz_mode();
+
+//        PWR->CSR |= PWR_CSR_EWUP;
+//        PWR->CR  |= PWR_CR_CWUF;
+//        PWR->CR = PWR_CR_PDDS | PWR_CR_CWUF;
+//        HAL_PWR_EnterSTANDBYMode();
     }
 
 

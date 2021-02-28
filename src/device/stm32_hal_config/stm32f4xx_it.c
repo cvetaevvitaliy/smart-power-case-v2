@@ -147,10 +147,10 @@ void PendSV_Handler(void)
 */
 void SysTick_Handler(void)
 {
-    static uint32_t tv;
+    static uint32_t tv = 0;
     tv++;
 
-    if (tv > 100) {
+    if (tv > 25) {
         CDC_SEND_BUFF();
         tv = 0;
 

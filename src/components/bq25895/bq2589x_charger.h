@@ -1,10 +1,34 @@
-/*******************************************************
-* Created by V.Cvetaev on 2019-10-26.
-********************************************************/
-#ifndef STM32_LTE_PROJECT_BQ2589X_CHARGER_H
-#define STM32_LTE_PROJECT_BQ2589X_CHARGER_H
+/**
+ *     BQ25895 I2C 1cell 5A buck battery charger with high input voltage
+ *
+ *     Copyright (c) 2020 Vitaliy Nimych (Cvetaev) @ cvetaevvitaliy@gmail.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef _BQ2589X_CHARGER_
+#define _BQ2589X_CHARGER_
 #include "bq2589x_reg.h"
-#include "stm32f4xx_hal.h"
+
+
+typedef int16_t (*i2c_write_ptr)(uint8_t, uint8_t, uint8_t *);
+typedef int16_t (*i2c_read_ptr) (uint8_t, uint8_t*, uint8_t);
+
+typedef struct {
+    /** Component mandatory fields **/
+    uint8_t bq25895x_i2c_address;
+    i2c_write_ptr  write_reg;
+    i2c_read_ptr   read_reg;
+} bq2589x_ctx_t;
 
 typedef enum bq2589x_vbus_type {
     BQ2589X_VBUS_NONE,
@@ -24,6 +48,8 @@ typedef enum bq2589x_part_no {
     BQ25895 = 0x07,
 }bq2589x_part_no;
 
+
+int16_t bq2589x_init_device(bq2589x_ctx_t *dev);
 
 bq2589x_vbus_type bq2589x_get_vbus_type(void);
 uint16_t bq2589x_enable_otg(void);
@@ -72,7 +98,6 @@ uint16_t bq2589x_use_absolute_vindpm(bool enable);
 
 uint16_t bq2589x_read_idpm_limit(void);
 bool bq2589x_is_charge_done(void);
-uint16_t bq2589x_init_device(void);
 uint16_t bq2589x_detect_device(bq2589x_part_no* part_no, int16_t * revision);
 
 
@@ -87,4 +112,4 @@ uint16_t bq2589x_set_bat_limit(int limit);
 
 
 
-#endif //STM32_LTE_PROJECT_BQ2589X_CHARGER_H
+#endif // _BQ2589X_CHARGER_

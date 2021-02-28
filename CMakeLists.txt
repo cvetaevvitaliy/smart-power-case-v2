@@ -60,6 +60,9 @@ set(CMAKE_CXX_STANDARD 11)
 add_definitions(-D__weak=__attribute__\(\(weak\)\) -D__packed=__attribute__\(\(__packed__\)\) -DUSE_HAL_DRIVER -DSTM32F411xE)
 add_definitions(-DMCU=\"STM32F411CEU6\")
 
+#add_subdirectory(shell)
+#set(INC_SHELL ${CMAKE_CURRENT_SOURCE_DIR}/shell ${CMAKE_CURRENT_SOURCE_DIR}/shell/shell)
+
 ###########################################################################################
 # Source files
 file(GLOB_RECURSE SOURCES_HAL
@@ -99,6 +102,8 @@ file(GLOB_RECURSE SOURCES_HAL
         "src/device/stm32_hal_config/stm32f4xx_hal_msp.c"
         "src/device/stm32_hal_config/stm32f4xx_it.c"
 
+        "src/components/delay/delay.c"
+
         "src/device/usbd/usb_device.c"
         "src/device/usbd/usbd_desc.c"
         "src/device/usbd/usbd_cdc_if.c"
@@ -130,7 +135,6 @@ file(GLOB_RECURSE SOURCES_HAL
         "src/device/service/service.c"
 
         "src/components/st7735s/st7735s.c"
-        "src/components/st7735s/st7735s_spi.c"
         "src/components/st7735s/fonts/*.*"
         "src/components/st7735s/picts/*.*"
 
@@ -146,6 +150,8 @@ include_directories(
         src/stm32_device_library/STM32_USB_Device_Library/Class/CDC/Inc
         src/stm32_device_library/STM32F4xx_HAL_Driver/Inc
         src/stm32_device_library/STM32F4xx_HAL_Driver/Inc/Legacy
+
+        src/components/delay
 
         src/device/stm32_hal_config
         src/device/usbd
@@ -191,6 +197,10 @@ endif()
 
 
 add_executable(${PROJECT_NAME}.elf ${SOURCES_HAL} ${LINKER_SCRIPT})
+
+add_subdirectory(src/components/lis3dh)
+include_directories(src/components/lis3dh)
+target_link_libraries(${PROJECT_NAME}.elf lib_lis3dh)
 
 set(CMAKE_EXE_LINKER_FLAGS
         "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}-V${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}-${GIT_HASH}.map" ${FPU_FLAGS})
