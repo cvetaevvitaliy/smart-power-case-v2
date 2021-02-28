@@ -4,3 +4,6 @@
 [submodule "src/components/bq25895"]
 	path = src/components/bq25895
 	url = https://github.com/cvetaevvitaliy/bq2589x
+[submodule "src/components/st7735s"]
+	path = src/components/st7735s
+	url = https://github.com/cvetaevvitaliy/st7735s
