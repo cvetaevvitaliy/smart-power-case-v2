@@ -1,13 +1,35 @@
-/********************************
-* Created by Vitaliy on 4/28/20.
-********************************/
-#ifndef FATSHARK_POWER_V1_BQ27441_H
-#define FATSHARK_POWER_V1_BQ27441_H
-#include <stdbool.h>
+/**
+ *     Copyright (c) 2020 Vitaliy Nimych (Cvetaev) @ cvetaevvitaliy@gmail.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef _BQ27441_H
+#define _BQ27441_H
 #include <stdint.h>
+#include <stdbool.h>
 #include "bq27441_definitions.h"
 
 #define BQ72441_I2C_TIMEOUT 20000
+
+typedef int16_t (*i2c_write_byte)(uint8_t, uint8_t, uint8_t *, uint8_t);
+typedef int16_t (*i2c_read_byte)(uint8_t, uint8_t, uint8_t *, uint8_t);
+
+typedef struct {
+    /** Component mandatory fields **/
+    uint8_t BQ27441_i2c_address;
+    i2c_write_byte  write_reg;
+    i2c_read_byte   read_reg;
+} BQ27441_ctx_t;
 
 // Parameters for the current() function, to specify which current to read
 typedef enum {
@@ -58,7 +80,7 @@ typedef enum {
  ************************** Initialization Functions *************************
  *****************************************************************************/
 
-bool BQ27441_init (void);
+bool BQ27441_init (BQ27441_ctx_t *dev);
 
 bool BQ27441_setCapacity (uint16_t capacity);
 bool BQ27441_setHibernateCurrent(uint16_t current_mA);
@@ -122,4 +144,4 @@ bool BQ27441_CLEAR_HIBERNATE(void);
 
 void BQ27441_Full_Reset(void);
 
-#endif //FATSHARK_POWER_V1_BQ27441_H
+#endif // _BQ27441_H

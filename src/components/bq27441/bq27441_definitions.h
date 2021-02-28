@@ -1,12 +1,20 @@
-/******************************************************************************
- * Created by Vitaliy on 4/28/20.
- * BQ27441_Definitions.h
- * BQ27441 LiPo Fuel Gauge Definitions
- * BQ27441 hardware constants, register addresses, and bit positions.
-******************************************************************************/
-
-#ifndef FATSHARK_POWER_V1_BQ27441_DEFINITIONS_H
-#define FATSHARK_POWER_V1_BQ27441_DEFINITIONS_H
+/**
+ *     Copyright (c) 2020 Vitaliy Nimych (Cvetaev) @ cvetaevvitaliy@gmail.com
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *          http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#ifndef _BQ27441_DEFINITIONS_H
+#define _BQ27441_DEFINITIONS_H
 
 #define BQ72441_I2C_ADDRESS             0x55 // Default I2C address of the BQ27441-G1A
 
@@ -176,4 +184,4 @@
 #define BQ27441_OPCONFIG_TEMPS    (1<<0)
 
 
-#endif //FATSHARK_POWER_V1_BQ27441_DEFINITIONS_H
+#endif //_BQ27441_DEFINITIONS_H
