@@ -1,5 +1,5 @@
-#ifndef ST7735S_F4_PICTS_H
-#define ST7735S_F4_PICTS_H
+#ifndef ST7735S_PICTS_H
+#define ST7735S_PICTS_H
 #include <stdint.h>
 
 typedef struct {
@@ -25,4 +25,4 @@ extern const tImage_RGB Image_Battery_2;
 extern const tImage Image_battery_small;
 extern const tImage_RGB usb_to_pc;
 
-#endif //ST7735S_F4_PICTS_H
+#endif //ST7735S_PICTS_H

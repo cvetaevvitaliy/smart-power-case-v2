@@ -2,7 +2,6 @@
 #define ST7735S_F4_ST7735S_SETTINGS_H
 #include <stdint.h>
 #include <stdbool.h>
-#include "stm32f4xx_hal.h"
 #include "st7735s.h"
 
 

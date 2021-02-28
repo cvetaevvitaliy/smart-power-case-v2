@@ -1,9 +1,12 @@
 #include "st7735s.h"
 #include "st7735s_settings.h"
+#include "delay.h"
 
 #define DELAY 0x80
 
 static uint16_t ScreenBuff[ST7735_WIDTH * ST7735_HEIGHT] = {0};
+
+static LCD_ST7735_ctx_t LCD_ST7735_ctx = {0};
 
 typedef struct ST7735s{
     uint8_t width;
@@ -105,44 +108,56 @@ init_cmds3[] = {            // Init for 7735R, part 3 (red or green tab)
 static void ST7735_ExecuteCommandList(const uint8_t *addr);
 
 
+uint8_t ST7735S_SPI_Transmit(uint8_t *pData, uint16_t Size)
+{
+    int16_t ret;
+    ret = LCD_ST7735_ctx.spi_write_data(pData, Size);
+    return ret;
+}
+
+
 static void LCD_ST7735S_Reset(void)
 {
-    HAL_GPIO_WritePin(SPI_RST_GPIO_PORT, SPI_RST_PIN, GPIO_PIN_RESET);
-    HAL_Delay(10);
-    HAL_GPIO_WritePin(SPI_RST_GPIO_PORT, SPI_RST_PIN, GPIO_PIN_SET);
+    LCD_ST7735_ctx.gpio_write_pin(LCD_ST7735_ctx.reset.gpio_port, LCD_ST7735_ctx.reset.gpio_pin, 0);
+    delay_ms(10);
+    LCD_ST7735_ctx.gpio_write_pin(LCD_ST7735_ctx.reset.gpio_port, LCD_ST7735_ctx.reset.gpio_pin, 1);
 }
 
 
 static void LCD_ST7735S_Select(void)
 {
-    HAL_GPIO_WritePin(SPI1_CS_GPIO_PORT, SPI1_CS_PIN, GPIO_PIN_RESET);
+    LCD_ST7735_ctx.gpio_write_pin(LCD_ST7735_ctx.cs.gpio_port, LCD_ST7735_ctx.cs.gpio_pin, 0);
 }
 
 
 static void LCD_ST7735S_Unselect(void)
 {
-    HAL_GPIO_WritePin(SPI1_CS_GPIO_PORT, SPI1_CS_PIN, GPIO_PIN_SET);
+    LCD_ST7735_ctx.gpio_write_pin(LCD_ST7735_ctx.cs.gpio_port, LCD_ST7735_ctx.cs.gpio_pin, 1);
 }
 
 
 static void LCD_ST7735S_DC_Select(void)
 {
-    HAL_GPIO_WritePin(SPI_DC_GPIO_PORT, SPI_DC_PIN, GPIO_PIN_SET);
+    LCD_ST7735_ctx.gpio_write_pin(LCD_ST7735_ctx.data.gpio_port, LCD_ST7735_ctx.data.gpio_pin, 1);
 }
 
 
 static void LCD_ST7735S_DC_Unselect(void)
 {
-    HAL_GPIO_WritePin(SPI_DC_GPIO_PORT, SPI_DC_PIN, GPIO_PIN_RESET);
+    LCD_ST7735_ctx.gpio_write_pin(LCD_ST7735_ctx.data.gpio_port, LCD_ST7735_ctx.data.gpio_pin, 0);
 }
 
 
 void LCD_ST7735S_Backlight(bool enable)
 {
     if (enable)
-        HAL_GPIO_WritePin(LCD_BLK_GPIO_PORT, LCD_BLK_PIN, GPIO_PIN_SET);
+    {
+        LCD_ST7735_ctx.gpio_write_pin(LCD_ST7735_ctx.backlight.gpio_port, LCD_ST7735_ctx.backlight.gpio_pin, 1);
+    }
     else
-        HAL_GPIO_WritePin(LCD_BLK_GPIO_PORT, LCD_BLK_PIN, GPIO_PIN_RESET);
+    {
+        LCD_ST7735_ctx.gpio_write_pin(LCD_ST7735_ctx.backlight.gpio_port, LCD_ST7735_ctx.backlight.gpio_pin, 0);
+    }
 }
 
 
@@ -161,8 +176,13 @@ static void ST7735_WriteData(uint8_t* buff, size_t buff_size)
 }
 
 
-void LCD_ST7735S_Init(void)
+void LCD_ST7735S_Init(LCD_ST7735_ctx_t *data)
 {
+    if (data == NULL)
+        return;
+
+    memcpy(&LCD_ST7735_ctx, data, sizeof(LCD_ST7735_ctx));
+
     LCD_ST7735S_Select();
     LCD_ST7735S_Reset();
     ST7735_ExecuteCommandList(init_cmds1);
@@ -199,7 +219,7 @@ static void ST7735_ExecuteCommandList(const uint8_t *addr)
         {
             ms = *addr++;
             if(ms == 255) ms = 500;
-            HAL_Delay(ms);
+            delay_ms(ms);
         }
     }
 }
@@ -507,7 +527,7 @@ void LCD_ST7735S_ScrollArea(uint8_t x_start, uint8_t x_stop)
     @param    h   Height of bitmap in pixels
 */
 /**************************************************************************/
-void LCD_ST7735S_drawRGBBitmap(int16_t x, int16_t y, const tImage_RGB *image)
+void LCD_ST7735S_Draw_RGB_Bitmap(int16_t x, int16_t y, const tImage_RGB *image)
 {
     uint16_t w = image->width;
     uint16_t h = image->height;
