@@ -1,0 +1,3 @@
+[submodule "src/components/bq27441"]
+	path = src/components/bq27441
+	url = https://github.com/cvetaevvitaliy/bq27441
