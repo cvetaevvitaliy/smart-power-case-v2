@@ -27,5 +27,4 @@ void Services_Loop(void)
     Power_LoopService();
     Display_LoopService();
     Battery_LoopService();
-
 }

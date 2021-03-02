@@ -12,7 +12,6 @@ DMA_HandleTypeDef hdma_i2c1_tx;
 SPI_HandleTypeDef hspi1;
 
 TIM_HandleTypeDef htim1;
-TIM_HandleTypeDef htim2;
 TIM_HandleTypeDef htim3;
 TIM_HandleTypeDef htim4;
 TIM_HandleTypeDef htim10;
@@ -23,6 +22,8 @@ DMA_HandleTypeDef hdma_usart1_tx;
 
 RTC_HandleTypeDef hrtc;
 
+DMA_HandleTypeDef hdma_spi1_tx;
+
 void SystemClock_Config(void);
 void MX_GPIO_Init(void);
 void MX_DMA_Init(void);
@@ -31,7 +32,6 @@ void MX_I2C1_Init(void);
 void MX_SPI1_Init(void);
 void MX_TIM1_Init(void);
 void MX_USART1_UART_Init(void);
-void MX_TIM2_Init(void);
 void MX_TIM3_Init(void);
 void MX_TIM10_Init(void);
 void MX_TIM4_Init(void);
@@ -56,7 +56,7 @@ void STM32_Init(void)
     MX_USART1_UART_Init();
 //    USB_Reset();
 //    MX_USB_DEVICE_Init();
-    MX_TIM2_Init();
+    //MX_TIM2_Init();
     MX_TIM3_Init();
     MX_TIM10_Init();
     MX_TIM4_Init();
@@ -225,6 +225,9 @@ void MX_DMA_Init(void)
     /* DMA2_Stream7_IRQn interrupt configuration */
     HAL_NVIC_SetPriority(DMA2_Stream7_IRQn, 0, 0);
     HAL_NVIC_EnableIRQ(DMA2_Stream7_IRQn);
+    /* DMA2_Stream3_IRQn interrupt configuration */
+    HAL_NVIC_SetPriority(DMA2_Stream3_IRQn, 5, 0);
+    HAL_NVIC_EnableIRQ(DMA2_Stream3_IRQn);
 
 }
 
@@ -376,38 +379,6 @@ void MX_TIM1_Init(void)
     }
 
     HAL_TIM_MspPostInit(&htim1);
-
-}
-
-/** TIM2 init function */
-void MX_TIM2_Init(void)
-{
-
-    TIM_ClockConfigTypeDef sClockSourceConfig;
-    TIM_MasterConfigTypeDef sMasterConfig;
-
-    htim2.Instance = TIM2;
-    htim2.Init.Prescaler = 0;
-    htim2.Init.CounterMode = TIM_COUNTERMODE_UP;
-    htim2.Init.Period = 0;
-    htim2.Init.ClockDivision = TIM_CLOCKDIVISION_DIV1;
-    if (HAL_TIM_Base_Init(&htim2) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    sClockSourceConfig.ClockSource = TIM_CLOCKSOURCE_INTERNAL;
-    if (HAL_TIM_ConfigClockSource(&htim2, &sClockSourceConfig) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
-
-    sMasterConfig.MasterOutputTrigger = TIM_TRGO_RESET;
-    sMasterConfig.MasterSlaveMode = TIM_MASTERSLAVEMODE_DISABLE;
-    if (HAL_TIMEx_MasterConfigSynchronization(&htim2, &sMasterConfig) != HAL_OK)
-    {
-        _Error_Handler(__FILE__, __LINE__);
-    }
 
 }
 
