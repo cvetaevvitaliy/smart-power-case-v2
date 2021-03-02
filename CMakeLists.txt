@@ -48,7 +48,7 @@ SET(FPU_FLAGS "-mfloat-abi=hard -mfpu=fpv4-sp-d16")
 
 SET(COMMON_FLAGS
         "-mcpu=cortex-m4 ${FPU_FLAGS} -mthumb -mthumb-interwork -ffunction-sections -fdata-sections \
-    -g -fno-common -fmessage-length=0 -specs=nosys.specs -specs=rdimon.specs")
+    -g -O2 -fno-common -fmessage-length=0 -specs=nosys.specs -specs=rdimon.specs")
 
 SET(CMAKE_CXX_FLAGS_INIT "${COMMON_FLAGS} -std=c++11")
 SET(CMAKE_C_FLAGS_INIT "${COMMON_FLAGS} -std=gnu99")
@@ -64,9 +64,22 @@ add_definitions(-DMCU=\"STM32F411CEU6\")
 #set(INC_SHELL ${CMAKE_CURRENT_SOURCE_DIR}/shell ${CMAKE_CURRENT_SOURCE_DIR}/shell/shell)
 
 ###########################################################################################
+
+# FreeRTOS sources
+set(FreeRTOS_SRC
+        "src/components/FreeRTOS/*.*"
+        )
+
+set(FreeRTOS_INC
+        src/components/FreeRTOS/Source/CMSIS_RTOS
+        src/components/FreeRTOS/Source/include
+        src/components/FreeRTOS/Source/portable/GCC/ARM_CM4F
+        )
+
 # Source files
 file(GLOB_RECURSE SOURCES_HAL
         "src/stm32_device_library/startup/startup_stm32f411xe.s"
+        ${FreeRTOS_SRC}
 
         "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c"
         "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c"
@@ -97,6 +110,7 @@ file(GLOB_RECURSE SOURCES_HAL
         "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/*.c"
         "src/stm32_device_library/STM32_USB_Device_Library/Class/CDC/Src/*.c"
         "src/stm32_device_library/STM32_USB_Device_Library/Core/Src/*.*"
+        "src/device/stm32_hal_config/stm32f4xx_hal_timebase_TIM.c"
 
         "src/device/stm32_hal_config/system_stm32f4xx.c"
         "src/device/stm32_hal_config/stm32f4xx_hal_msp.c"
@@ -138,12 +152,14 @@ file(GLOB_RECURSE SOURCES_HAL
         "src/components/st7735s/fonts/*.*"
         "src/components/st7735s/picts/*.*"
 
+        "src/device/display/lv_demo_keypad_encoder.c"
 
         "src/main.c")
 
 
 # Include dirs
 include_directories(
+        ${FreeRTOS_INC}
         src/stm32_device_library/CMSIS/Include
         src/stm32_device_library/CMSIS/Device/ST/STM32F4xx/Include
         src/stm32_device_library/STM32_USB_Device_Library/Core/Inc
@@ -200,7 +216,21 @@ add_executable(${PROJECT_NAME}.elf ${SOURCES_HAL} ${LINKER_SCRIPT})
 
 add_subdirectory(src/components/lis3dh)
 include_directories(src/components/lis3dh)
-target_link_libraries(${PROJECT_NAME}.elf lib_lis3dh)
+
+add_subdirectory(src/components/gui/lvgl)
+include_directories(src/components/gui
+        src/components/gui/lvgl
+        src/components/gui/lvgl/src
+        src/components/gui/lvgl/src/lv_core
+        src/components/gui/lvgl/src/lv_draw
+        src/components/gui/lvgl/src/lv_font
+        src/components/gui/lvgl/src/lv_gpu
+        src/components/gui/lvgl/src/lv_hal
+        src/components/gui/lvgl/src/lv_misc
+        src/components/gui/lvgl/src/lv_themes
+        src/components/gui/lvgl/src/lv_widgets
+        )
+target_link_libraries(${PROJECT_NAME}.elf lib_lis3dh lvgl)
 
 set(CMAKE_EXE_LINKER_FLAGS
         "${CMAKE_EXE_LINKER_FLAGS} -Wl,-Map=${PROJECT_BINARY_DIR}/${PROJECT_NAME}-V${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}-${GIT_HASH}.map" ${FPU_FLAGS})

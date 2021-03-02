@@ -58,17 +58,19 @@ extern DMA_HandleTypeDef hdma_usart1_rx;
 extern DMA_HandleTypeDef hdma_usart1_tx;
 extern UART_HandleTypeDef huart1;
 
+extern DMA_HandleTypeDef hdma_spi1_tx;
+
 /******************************************************************************/
 /*            Cortex-M4 Processor Interruption and Exception Handlers         */ 
 /******************************************************************************/
 
-/**
-* @brief This function handles Non maskable interrupt.
-*/
-void NMI_Handler(void)
-{
-
-}
+///**
+//* @brief This function handles Non maskable interrupt.
+//*/
+//void NMI_Handler(void)
+//{
+//
+//}
 
 /**
 * @brief This function handles Hard fault interrupt.
@@ -118,13 +120,13 @@ void UsageFault_Handler(void)
 
 }
 
-/**
-* @brief This function handles System service call via SWI instruction.
-*/
-void SVC_Handler(void)
-{
-
-}
+///**
+//* @brief This function handles System service call via SWI instruction.
+//*/
+//void SVC_Handler(void)
+//{
+//
+//}
 
 /**
 * @brief This function handles Debug monitor.
@@ -134,19 +136,24 @@ void DebugMon_Handler(void)
 
 }
 
-/**
-* @brief This function handles Pendable request for system service.
-*/
-void PendSV_Handler(void)
-{
-
-}
+///**
+//* @brief This function handles Pendable request for system service.
+//*/
+//void PendSV_Handler(void)
+//{
+//
+//}
 
 /**
 * @brief This function handles System tick timer.
 */
+#include "cmsis_os.h"
+#include "lvgl.h"
 void SysTick_Handler(void)
 {
+    lv_tick_inc(1);
+    SysTick_CLI();
+    osSystickHandler();
     static uint32_t tv = 0;
     tv++;
 
@@ -155,8 +162,6 @@ void SysTick_Handler(void)
         tv = 0;
 
     }
-
-    SysTick_CLI();
 
     HAL_IncTick();
     HAL_SYSTICK_IRQHandler();
@@ -366,6 +371,11 @@ void DMA2_Stream7_IRQHandler(void)
 void FPU_IRQHandler(void)
 {
 
+}
+
+void DMA2_Stream3_IRQHandler(void)
+{
+    HAL_DMA_IRQHandler(&hdma_spi1_tx);
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/
