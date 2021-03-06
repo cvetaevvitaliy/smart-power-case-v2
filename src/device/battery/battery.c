@@ -2,6 +2,7 @@
 #include "bq27441.h"
 #include "stm32f4xx.h"
 #include "cli.h"
+#include "gui_main_screen.h"
 
 extern I2C_HandleTypeDef hi2c1;
 
@@ -53,9 +54,8 @@ void Battery_Init(void)
     BQ27441_init(&BQ27441);
 }
 
-void Battery_LoopService(void)
+void Battery_Loop(void)
 {
-    static uint32_t tv_delay = 0;
 
     ULOG_TRACE("BQ27441 deviceType 0x%04X\n", BQ27441_deviceType());
     Battery_status.temperature = (float) BQ27441_temperature(BATTERY) / 100.0f;
@@ -71,7 +71,6 @@ void Battery_LoopService(void)
     Battery_status.charge_detect = BQ27441_fcFlag();
     Battery_status.fast_charge = BQ27441_chgFlag();
     Battery_status.battery_discharging = BQ27441_dsgFlag();
-    tv_delay = HAL_GetTick();
 
     ULOG_TRACE("temperature: %.2f\n", Battery_status.temperature);
     ULOG_TRACE("capacity: %d\n", Battery_status.capacity);
@@ -85,6 +84,18 @@ void Battery_LoopService(void)
     ULOG_TRACE("power: %d\n", Battery_status.power);
     ULOG_TRACE("health: %d\n", Battery_status.health);
     ULOG_TRACE("charge_detect: %d\n", Battery_status.charge_detect);
+
+    /** For test position different value to LCD screen*/
+    static uint8_t tmp = 100;
+    tmp--;
+
+    if (tmp == 0)
+        tmp = 100;
+
+    //gui_set_bat_percent(Battery_status.percent);
+    gui_set_bat_percent(tmp);
+
+    gui_set_bat_voltage(Battery_status.vbat);
 
 }
 

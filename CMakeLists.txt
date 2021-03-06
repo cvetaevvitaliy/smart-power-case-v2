@@ -14,17 +14,24 @@ add_definitions(-DMAJOR=\"${VERSION_MINOR}\")
 add_definitions(-DPATCH=\"${VERSION_PATCH}\")
 
 ####################################################################################################
-# Get git hash ang git branch name (please use definition in project GIT_HASH & GIT_BRANCH)
+# Get git hash ang git branch name
+find_package(Git)
+if(GIT_FOUND)
+    # get git branch name
+    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD COMMAND cut -c1-10 OUTPUT_VARIABLE GIT_BRANCH)
+    string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
 
-# Git branch name
-execute_process(COMMAND git rev-parse --abbrev-ref HEAD COMMAND cut -c1-10 OUTPUT_VARIABLE GIT_BRANCH)
-string(STRIP ${GIT_BRANCH} GIT_BRANCH)
+    # get git hash
+    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --short=8 HEAD OUTPUT_VARIABLE GIT_HASH)
+    string(STRIP "${GIT_HASH}" GIT_HASH)
+
+else()
+   set(GIT_HASH "000000")
+   set(GIT_BRANCH "none")
+endif()
+
 message(STATUS "Git branch - ${GIT_BRANCH}")
 add_definitions(-DGIT_BRANCH=\"${GIT_BRANCH}\")
-
-# Git hash
-execute_process(COMMAND git rev-parse --short=8 HEAD OUTPUT_VARIABLE GIT_HASH)
-string(STRIP ${GIT_HASH} GIT_HASH)
 message(STATUS "Git hash - ${GIT_HASH}")
 add_definitions(-DGIT_HASH=\"${GIT_HASH}\")
 
@@ -77,35 +84,9 @@ set(FreeRTOS_INC
         )
 
 # Source files
-file(GLOB_RECURSE SOURCES_HAL
+file(GLOB_RECURSE SOURCES
         "src/stm32_device_library/startup/startup_stm32f411xe.s"
         ${FreeRTOS_SRC}
-
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_adc_ex.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_cortex.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_dma_ex.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ex.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_flash_ramfunc.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_gpio.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_i2c_ex.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pcd_ex.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_pwr_ex.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rcc_ex.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_spi.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_tim_ex.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_uart.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_ll_usb.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc.c"
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/stm32f4xx_hal_rtc_ex.c"
 
         "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/*.c"
         "src/stm32_device_library/STM32_USB_Device_Library/Class/CDC/Src/*.c"
@@ -146,13 +127,15 @@ file(GLOB_RECURSE SOURCES_HAL
         "src/device/button/button.c"
         "src/device/display/display.c"
         "src/device/power/power.c"
-        "src/device/service/service.c"
+        "src/device/tasks/device_tasks.c"
 
         "src/components/st7735s/st7735s.c"
         "src/components/st7735s/fonts/*.*"
         "src/components/st7735s/picts/*.*"
 
         "src/device/display/lv_demo_keypad_encoder.c"
+        "src/device/gui/*.c"
+        "src/device/gui/icon/*.c"
 
         "src/main.c")
 
@@ -189,7 +172,9 @@ include_directories(
         src/device/button
         src/device/display
         src/device/power
-        src/device/service
+        src/device/tasks
+        src/device/gui
+        src/device/gui/icon
 
         src/components/st7735s
         src/components/st7735s/fonts
@@ -212,7 +197,7 @@ endif()
 
 
 
-add_executable(${PROJECT_NAME}.elf ${SOURCES_HAL} ${LINKER_SCRIPT})
+add_executable(${PROJECT_NAME}.elf ${SOURCES} ${LINKER_SCRIPT})
 
 add_subdirectory(src/components/lis3dh)
 include_directories(src/components/lis3dh)

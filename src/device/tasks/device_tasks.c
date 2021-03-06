@@ -1,4 +1,4 @@
-#include "service.h"
+#include "device_tasks.h"
 #include "stm32_init.h"
 #include "cli.h"
 #include "dfu.h"
@@ -17,14 +17,13 @@ void Services_Init(void)
     cli_init();
     dfu_add_cli_cmd();
 
-
 }
 
 
 void Services_Loop(void)
 {
     cli_loop_service();
-    Power_LoopService();
-    Display_LoopService();
-    Battery_LoopService();
+    Power_Loop();
+    Display_Loop();
+    Battery_Loop();
 }

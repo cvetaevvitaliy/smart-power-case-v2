@@ -68,7 +68,7 @@ bool Power_InitChargerChip(void)
 
 }
 
-void Power_LoopService(void)
+void Power_Loop(void)
 {
     static uint32_t tv_delay = 0;
     static bool usb_enable = false;

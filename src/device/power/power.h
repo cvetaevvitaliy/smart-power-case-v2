@@ -19,7 +19,7 @@ typedef struct
 
 bool Power_InitChargerChip(void);
 
-void Power_LoopService(void);
+void Power_Loop(void);
 
 Power_Status_t *Power_GetStatus(void);
 
