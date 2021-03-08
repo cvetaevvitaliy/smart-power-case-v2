@@ -119,7 +119,7 @@ bool keypad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
         }
 
         last_key = act_key;
-        ULOG_DEBUG("data->key: %s\n", lv_key_to_str(act_key));
+        //ULOG_DEBUG("data->key: %s\n", lv_key_to_str(act_key));
 
     } else {
         data->state = LV_INDEV_STATE_REL;

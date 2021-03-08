@@ -10,11 +10,16 @@
 #include "button.h"
 #include "gui_main_screen.h"
 #include "gui_menu_screen.h"
+#include "gui_settings_screen.h"
 
 static lv_indev_t * indev_keypad;
 lv_group_t*  group;
-static lv_obj_t * tv;
 static lv_disp_drv_t disp_drv;
+
+extern gui_screen_t gui_screen;
+
+/** Global styles */
+gui_style_t gui_style;
 
 
 static void ST7735_flush(lv_disp_drv_t * drv, const lv_area_t * area,  lv_color_t * color_map)
@@ -39,21 +44,36 @@ static void ST7735_flush(lv_disp_drv_t * drv, const lv_area_t * area,  lv_color_
 
 static void focus_cb(lv_group_t * cur_group)
 {
-    lv_obj_t * obj = lv_group_get_focused(cur_group);
-    if(obj != tv) {
-//        uint16_t tab = lv_tabview_get_tab_act(tv);
-//        switch(tab) {
-//            case 0:
-//                lv_page_focus(t1, obj, LV_ANIM_ON);
-//                break;
-//            case 1:
-//                lv_page_focus(t2, obj, LV_ANIM_ON);
-//                break;
-//            case 2:
-//                lv_page_focus(t3, obj, LV_ANIM_ON);
-//                break;
-//        }
+    lv_obj_t *obj = lv_group_get_focused(cur_group);
+
+#if 0
+    ULOG_DEBUG("obj: %d\n", obj);
+    if (obj == gui_obj_settings_scr.check_box)
+    {
+        lv_page_focus(gui_screen.settings_screen, obj, LV_ANIM_ON);
     }
+
+    if (obj == gui_obj_settings_scr.check_box_2)
+    {
+        lv_page_focus(gui_screen.settings_screen, obj, LV_ANIM_ON);
+    }
+
+    if (obj == gui_obj_settings_scr.check_box_3)
+    {
+        lv_page_focus(gui_screen.settings_screen, obj, LV_ANIM_ON);
+    }
+
+    if (obj == gui_obj_settings_scr.check_box_4)
+    {
+        lv_page_focus(gui_screen.settings_screen, obj, LV_ANIM_ON);
+    }
+    if (obj == gui_obj_settings_scr.check_box_5)
+    {
+        lv_page_focus(gui_screen.settings_screen, obj, LV_ANIM_ON);
+    }
+#endif
+
+
 }
 
 void gui_init(void)
@@ -97,10 +117,94 @@ void gui_init(void)
 
     }
 
+    gui_style_init(&gui_style);
+
     gui_main_screen();
 
     gui_menu_screen();
 
+    gui_settings_screen();
+
+}
+
+
+lv_group_t* gui_get_focus_obj(void)
+{
+    return group;
+}
+
+_unused
+char* gui_debug_event(lv_event_t event)
+{
+    static char* event_str = NULL;
+
+    switch (event)
+    {
+        case LV_EVENT_PRESSED:
+            event_str = "LV_EVENT_PRESSED";
+            break;
+        case LV_EVENT_PRESSING:
+            event_str = "LV_EVENT_PRESSING";
+            break;
+        case LV_EVENT_PRESS_LOST:
+            event_str = "LV_EVENT_PRESS_LOST";
+            break;
+        case LV_EVENT_SHORT_CLICKED:
+            event_str = "LV_EVENT_SHORT_CLICKED";
+            break;
+        case LV_EVENT_LONG_PRESSED:
+            event_str = "LV_EVENT_LONG_PRESSED";
+            break;
+        case LV_EVENT_LONG_PRESSED_REPEAT:
+            event_str = "LV_EVENT_LONG_PRESSED_REPEAT";
+            break;
+        case LV_EVENT_CLICKED:
+            event_str = "LV_EVENT_CLICKED";
+            break;
+        case LV_EVENT_RELEASED:
+            event_str = "LV_EVENT_RELEASED";
+            break;
+        case LV_EVENT_DRAG_BEGIN:
+            event_str = "LV_EVENT_DRAG_BEGIN";
+            break;
+        case LV_EVENT_DRAG_END:
+            event_str = "LV_EVENT_DRAG_END";
+            break;
+        case LV_EVENT_KEY:
+            event_str = "LV_EVENT_KEY";
+            break;
+        case LV_EVENT_FOCUSED:
+            event_str = "LV_EVENT_FOCUSED";
+            break;
+        case LV_EVENT_DEFOCUSED:
+            event_str = "LV_EVENT_DEFOCUSED";
+            break;
+        case LV_EVENT_LEAVE:
+            event_str = "LV_EVENT_LEAVE";
+            break;
+        case LV_EVENT_VALUE_CHANGED:
+            event_str = "LV_EVENT_VALUE_CHANGED";
+            break;
+        case LV_EVENT_INSERT:
+            event_str = "LV_EVENT_INSERT";
+            break;
+        case LV_EVENT_REFRESH:
+            event_str = "LV_EVENT_REFRESH";
+            break;
+        case LV_EVENT_APPLY:
+            event_str = "LV_EVENT_APPLY";
+            break;
+        case LV_EVENT_CANCEL:
+            event_str = "LV_EVENT_CANCEL";
+            break;
+
+        default:
+            event_str = "UNKNOWN";
+            break;
+    }
+
+
+    return event_str;
 }
 
 
