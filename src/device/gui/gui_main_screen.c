@@ -65,10 +65,11 @@ static void event_main_scr(lv_obj_t * obj, lv_event_t event)
             //lv_scr_load_anim(gui_screen.main_scr_2, LV_SCR_LOAD_ANIM_MOVE_TOP, 660, 0, false);
             break;
         case LV_EVENT_SHORT_CLICKED:
+
+            /** Remove all object in focus joystick and add new objects for focus */
             lv_group_remove_all_objs(group);
             lv_group_add_obj(group, gui_screen.menu_screen);
-            //lv_group_add_obj(group, gui_screen.icon_1);
-            lv_group_add_obj(group, gui_screen.icon_mah);
+            lv_group_add_obj(group, gui_screen.icon_1);
             lv_group_add_obj(group, gui_screen.icon_2);
             lv_group_add_obj(group, gui_screen.icon_3);
             lv_scr_load_anim(gui_screen.menu_screen, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 660, 0, false);
