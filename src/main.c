@@ -9,6 +9,7 @@
 #include "battery.h"
 #include "display.h"
 #include "lvgl.h"
+#include "gui_main_screen.h"
 
 osThreadId cli_task_handle;
 osThreadId lvgl_task_handle;
@@ -56,7 +57,8 @@ void lvgl_task(void const * argument)
     while (1)
     {
         lv_task_handler();
-        osDelay(50);
+        gui_update_value();
+        osDelay(5);
     }
 
 }

@@ -5,6 +5,7 @@
 #include "gui_main_screen.h"
 
 extern I2C_HandleTypeDef hi2c1;
+static uint8_t tmp = 100;
 
 static Battery_status_t Battery_status = {0};
 
@@ -92,11 +93,7 @@ void Battery_Loop(void)
     if (tmp == 0)
         tmp = 100;
 
-    //gui_set_bat_percent(Battery_status.percent);
-    gui_set_bat_percent(tmp);
-
-    gui_set_bat_voltage(Battery_status.vbat);
-
+    //Battery_status.percent = tmp;
 }
 
 Battery_status_t *Battery_GetStatus(void)

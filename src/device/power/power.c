@@ -114,8 +114,10 @@ void Power_Loop(void)
         cli_set_first_in_cli(true);
         //LCD_ST7735S_Clear();
         //LCD_ST7735S_Update();
+#if 0
         bq2589x_enter_ship_mode();
         bq2589x_enter_hiz_mode();
+#endif
 
 //        PWR->CSR |= PWR_CSR_EWUP;
 //        PWR->CR  |= PWR_CR_CWUF;

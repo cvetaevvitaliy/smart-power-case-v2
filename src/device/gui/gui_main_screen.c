@@ -13,11 +13,19 @@
 gui_screen_t gui_screen = {0};
 
 extern lv_group_t*  group;
+static char bat_perc[100] = {0};
 
-void gui_main_screen_1(void);
-void gui_main_screen_2(void);
+typedef enum {
+    GUI_PRINT_VOLTAGE = 1,
+    GUI_PRINT_PERCENT,
+    GUI_PRINT_MAH,
+    GUI_PRINT_TIME,
+    GUI_PRINT_CURRENT,
 
-static char bat_perc[6] = {0};
+    GUI_LAST_VALUE,
+} gui_print_bat_st_t;
+
+gui_print_bat_st_t gui_print_bat_st;
 
 static void my_event_cb_scr_1(lv_obj_t * obj, lv_event_t event)
 {
@@ -41,23 +49,29 @@ static void my_event_cb_scr_1(lv_obj_t * obj, lv_event_t event)
             break;
 
     }
-
-    /*Etc.*/
 }
 
-static void my_event_cb_scr_2(lv_obj_t * obj, lv_event_t event)
+static void event_main_scr(lv_obj_t * obj, lv_event_t event)
 {
     ULOG_DEBUG("event %d\n", event);
 
     switch(event)
     {
         case LV_EVENT_FOCUSED:
-            ULOG_DEBUG("LV_EVENT_FOCUSED\n");
-            ULOG_DEBUG("Load screen 1\n");
+            ULOG_DEBUG("Main screen: FOCUSED, send event to bat_info\n");
+            lv_event_send(gui_screen.bat_percent, LV_EVENT_FOCUSED, NULL);
+
             //lv_scr_load_anim(gui_screen.main_scr_1, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 660, 0, false);
             //lv_scr_load_anim(gui_screen.main_scr_2, LV_SCR_LOAD_ANIM_MOVE_TOP, 660, 0, false);
             break;
         case LV_EVENT_SHORT_CLICKED:
+            lv_group_remove_all_objs(group);
+            lv_group_add_obj(group, gui_screen.menu_screen);
+            //lv_group_add_obj(group, gui_screen.icon_1);
+            lv_group_add_obj(group, gui_screen.icon_mah);
+            lv_group_add_obj(group, gui_screen.icon_2);
+            lv_group_add_obj(group, gui_screen.icon_3);
+            lv_scr_load_anim(gui_screen.menu_screen, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 660, 0, false);
             ULOG_DEBUG("LV_EVENT_SHORT_CLICKED\n");
             break;
         case LV_EVENT_LONG_PRESSED:
@@ -68,17 +82,31 @@ static void my_event_cb_scr_2(lv_obj_t * obj, lv_event_t event)
             break;
 
     }
-
-    /*Etc.*/
 }
 
-void g_init(void)
+static void event_handler_bat_info(lv_obj_t * obj, lv_event_t event)
 {
+    UNUSED(obj);
 
+    ULOG_DEBUG("event_handler_bat_info: %d \n", event);
 
+    switch(event)
+    {
+        case LV_EVENT_FOCUSED:
+            ULOG_DEBUG("FOCUSED \n");
+            gui_print_bat_st++;
+            if (gui_print_bat_st > GUI_LAST_VALUE)
+                gui_print_bat_st = GUI_PRINT_VOLTAGE;
+
+            break;
+
+        case LV_EVENT_SHORT_CLICKED:
+            lv_event_send(gui_screen.main_screen, LV_EVENT_SHORT_CLICKED, NULL);
+            break;
+    }
 }
 
-void gui_main_screen_1(void)
+void gui_main_screen(void)
 {
     LV_IMG_DECLARE(battery_1);
     LV_IMG_DECLARE(battery_icon_big);
@@ -88,13 +116,9 @@ void gui_main_screen_1(void)
 
     gui_style_init(&gui_screen.gui_style_t);
 
-    static lv_style_t style_screen;
-    lv_style_init(&style_screen);
-    lv_style_set_bg_color(&style_screen, LV_STATE_DEFAULT, LV_COLOR_BLACK);
-
     gui_screen.main_screen = lv_obj_create(NULL, NULL);
-    lv_obj_set_event_cb(gui_screen.main_screen, my_event_cb_scr_2);   /*Assign an event callback*/
-    lv_obj_add_style(gui_screen.main_screen, LV_OBJ_PART_MAIN, &style_screen);  //turn the screen white
+    lv_obj_set_event_cb(gui_screen.main_screen, event_main_scr);   /*Assign an event callback*/
+    lv_obj_add_style(gui_screen.main_screen, LV_OBJ_PART_MAIN, &gui_screen.gui_style_t.style_screen);
     lv_scr_load_anim(gui_screen.main_screen, LV_SCR_LOAD_ANIM_NONE, 660, 0, false);
 
 
@@ -191,9 +215,16 @@ void gui_main_screen_1(void)
     lv_label_set_text(gui_screen.bat_percent, bat_perc);
     lv_obj_set_style_local_text_color(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_WHITE);
     lv_obj_set_style_local_text_sel_bg_color(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
-    lv_obj_align_origo(gui_screen.bat_percent, NULL, LV_ALIGN_CENTER, -14, 0);
+    lv_obj_set_style_local_text_font(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, &lv_font_montserrat_26);
+    lv_obj_align_origo(gui_screen.bat_percent, gui_screen.fill_icon_bat_big, LV_ALIGN_CENTER, -49, -1);
+
+    lv_label_set_long_mode(gui_screen.bat_percent, LV_LABEL_LONG_SROLL);     /*Circular scroll*/
+    lv_obj_set_width(gui_screen.bat_percent, 98);
+    lv_obj_set_style_local_text_letter_space(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, 1);
+    lv_obj_set_event_cb(gui_screen.bat_percent, event_handler_bat_info);
 
 
+    lv_group_add_obj(group, gui_screen.bat_percent);
     lv_group_add_obj(group, gui_screen.main_screen);
     //lv_group_add_obj(group, gui_screen.main_scr_1);
 
@@ -202,21 +233,21 @@ void gui_main_screen_1(void)
 void gui_set_bat_percent(uint8_t value)
 {
     lv_obj_set_size(gui_screen.fill_icon_bat_big, value,48);
-    if (value > 75 && value <= 100)
+    if (value > 65 && value <= 100)
         lv_obj_set_style_local_bg_color(gui_screen.fill_icon_bat_big, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0x20f962));
-    else if (value > 20 && value <= 75)
+    else if (value > 20 && value <= 65)
         lv_obj_set_style_local_bg_color(gui_screen.fill_icon_bat_big, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, lv_color_hex(0xf5bb3d));
     else if (value > 0 && value <= 20)
         lv_obj_set_style_local_bg_color(gui_screen.fill_icon_bat_big, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
 
-    sprintf(bat_perc, "%d%% ",value);
-    lv_label_set_text(gui_screen.bat_percent, bat_perc);
-    if (value > 75 && value <= 100)
-        lv_obj_set_style_local_text_color(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
-    else if (value > 40 && value <= 75)
-        lv_obj_set_style_local_text_color(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
-    else
-        lv_obj_set_style_local_text_color(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_WHITE);
+//    sprintf(bat_perc, "%d%%,value);
+//    lv_label_set_text(gui_screen.bat_percent, bat_perc);
+//    if (value > 75 && value <= 100)
+//        lv_obj_set_style_local_text_color(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_BLACK);
+//    else if (value > 40 && value <= 75)
+//        lv_obj_set_style_local_text_color(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
+//    else
+//        lv_obj_set_style_local_text_color(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_WHITE);
 }
 
 void gui_set_bat_voltage(float value)
@@ -224,5 +255,47 @@ void gui_set_bat_voltage(float value)
 //    sprintf(bat_perc, "%.2fV ", value);
 //    lv_label_set_text(gui_screen.bat_percent, bat_perc);
 //    lv_obj_align_origo(gui_screen.bat_percent, NULL, LV_ALIGN_CENTER, -1, 0);
+}
+
+void gui_update_value(void)
+{
+    Battery_status_t *battery_status = Battery_GetStatus();
+    switch (gui_print_bat_st)
+    {
+        case GUI_PRINT_VOLTAGE:
+            sprintf(bat_perc, "  %.2fV", battery_status->vbat);
+            break;
+
+        case GUI_PRINT_PERCENT:
+        {
+            if (battery_status->percent == 100)
+                sprintf(bat_perc, "  %d%%", battery_status->percent);
+            else if (battery_status->percent < 100 && battery_status->percent > 10)
+                sprintf(bat_perc, "   %d%%", battery_status->percent);
+            else
+                sprintf(bat_perc, "    %d%%", battery_status->percent);
+        }
+            break;
+
+        case GUI_PRINT_MAH:
+            sprintf(bat_perc, "%dmAh", battery_status->capacity);
+            break;
+
+        case GUI_PRINT_CURRENT:
+            sprintf(bat_perc, "%.3fA", (float) battery_status->current / 1000.f);
+            break;
+
+        case GUI_PRINT_TIME:
+            sprintf(bat_perc, "1h22min");
+            break;
+
+        default:
+            gui_print_bat_st = GUI_PRINT_VOLTAGE;
+            break;
+    }
+
+    lv_label_set_text(gui_screen.bat_percent, bat_perc);
+    gui_set_bat_percent(battery_status->percent);
+
 }
 

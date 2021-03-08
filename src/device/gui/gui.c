@@ -9,10 +9,12 @@
 #include "lvgl.h"
 #include "button.h"
 #include "gui_main_screen.h"
+#include "gui_menu_screen.h"
 
 static lv_indev_t * indev_keypad;
 lv_group_t*  group;
 static lv_obj_t * tv;
+static lv_disp_drv_t disp_drv;
 
 
 static void ST7735_flush(lv_disp_drv_t * drv, const lv_area_t * area,  lv_color_t * color_map)
@@ -62,8 +64,6 @@ void gui_init(void)
     static lv_color_t buf_1[LV_HOR_RES_MAX * 10];
     lv_disp_buf_init(&disp_buf, buf_1, NULL, LV_HOR_RES_MAX * 10);
 
-
-    lv_disp_drv_t disp_drv;
     disp_drv.hor_res = 160;
     disp_drv.ver_res = 80;
 
@@ -97,7 +97,9 @@ void gui_init(void)
 
     }
 
-    gui_main_screen_1();
+    gui_main_screen();
+
+    gui_menu_screen();
 
 }
 
