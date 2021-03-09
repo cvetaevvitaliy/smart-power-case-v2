@@ -5,6 +5,8 @@
 
 typedef struct {
     lv_obj_t * buzzer_icon;
+    lv_obj_t * timer_icon;
+    lv_obj_t * acc_icon;
 
 } gui_settings_scr_t;
 
