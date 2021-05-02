@@ -38,7 +38,7 @@ static void my_event_cb_scr_1(lv_obj_t * obj, lv_event_t event)
         case LV_EVENT_FOCUSED:
             ULOG_DEBUG("LV_EVENT_FOCUSED\n");
             ULOG_DEBUG("Load screen 2\n");
-            lv_scr_load_anim(gui_screen.main_screen, LV_SCR_LOAD_ANIM_MOVE_TOP, 660, 0, false);
+            lv_scr_load_anim(gui_screen.main_scr, LV_SCR_LOAD_ANIM_MOVE_TOP, 660, 0, false);
             break;
         case LV_EVENT_SHORT_CLICKED:
             ULOG_DEBUG("LV_EVENT_SHORT_CLICKED\n");
@@ -68,14 +68,15 @@ static void event_main_scr(lv_obj_t * obj, lv_event_t event)
         case LV_EVENT_SHORT_CLICKED:
 
             /** Remove all object in focus joystick and add new objects for focus */
-            lv_group_remove_all_objs(gui_get_focus_obj());
-            lv_group_add_obj(gui_get_focus_obj(), gui_screen.menu_screen);
-            lv_group_add_obj(gui_get_focus_obj(), gui_screen.icon_1);
-            lv_group_add_obj(gui_get_focus_obj(), gui_screen.icon_2);
-            lv_group_add_obj(gui_get_focus_obj(), gui_screen.icon_3);
-            lv_scr_load_anim(gui_screen.menu_screen, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 660, 0, false);
+            lv_group_remove_all_objs(gui_get_group_focus_obj());
+            lv_group_add_obj(gui_get_group_focus_obj(), gui_screen.menu_scr);
+            lv_group_add_obj(gui_get_group_focus_obj(), gui_screen.icon_1);
+            lv_group_add_obj(gui_get_group_focus_obj(), gui_screen.icon_2);
+            lv_group_add_obj(gui_get_group_focus_obj(), gui_screen.icon_3);
+            lv_scr_load_anim(gui_screen.menu_scr, LV_SCR_LOAD_ANIM_MOVE_BOTTOM, 660, 0, false);
             break;
         case LV_EVENT_LONG_PRESSED:
+            Power_PowerOff(POWER_OFF_ALL);
             break;
 
         default:
@@ -99,7 +100,10 @@ static void event_handler_bat_info(lv_obj_t * obj, lv_event_t event)
             break;
 
         case LV_EVENT_SHORT_CLICKED:
-            lv_event_send(gui_screen.main_screen, LV_EVENT_SHORT_CLICKED, NULL);
+            lv_event_send(gui_screen.main_scr, LV_EVENT_SHORT_CLICKED, NULL);
+            break;
+        case LV_EVENT_LONG_PRESSED:
+            lv_event_send(gui_screen.main_scr, LV_EVENT_LONG_PRESSED, NULL);
             break;
     }
 }
@@ -112,102 +116,29 @@ void gui_main_screen(void)
     LV_IMG_DECLARE(mah_icon);
     LV_IMG_DECLARE(big_bat_tail_icon);
 
-    gui_screen.main_screen = lv_obj_create(NULL, NULL);
-    lv_obj_set_event_cb(gui_screen.main_screen, event_main_scr);   /*Assign an event callback*/
-    lv_obj_add_style(gui_screen.main_screen, LV_OBJ_PART_MAIN, &gui_style.style_screen);
-    lv_scr_load_anim(gui_screen.main_screen, LV_SCR_LOAD_ANIM_NONE, 660, 0, false);
+    gui_screen.main_scr = lv_obj_create(NULL, NULL);
+    lv_obj_set_event_cb(gui_screen.main_scr, event_main_scr);   /*Assign an event callback*/
+    lv_obj_add_style(gui_screen.main_scr, LV_OBJ_PART_MAIN, &gui_style.style_screen);
+    lv_scr_load_anim(gui_screen.main_scr, LV_SCR_LOAD_ANIM_NONE, 660, 0, false);
 
 
-#if 0
-    gui_screen.main_scr_1 = lv_obj_create(NULL, NULL);
-    lv_obj_set_event_cb(gui_screen.main_scr_1, my_event_cb_scr_1);   /*Assign an event callback*/
-    lv_scr_load_anim(gui_screen.main_scr_1, LV_SCR_LOAD_ANIM_OVER_BOTTOM, 500, 0, false);
-
-    gui_screen.main_screen = lv_obj_create(NULL, NULL);
-    lv_obj_set_event_cb(gui_screen.main_screen, my_event_cb_scr_2);   /*Assign an event callback*/
-
-    lv_obj_add_style(gui_screen.main_scr_1, LV_OBJ_PART_MAIN, &style_screen);  //turn the screen white
-    lv_obj_add_style(gui_screen.main_screen, LV_OBJ_PART_MAIN, &style_screen);  //turn the screen white
-
-    /*Create 2 buttons*/
-    lv_obj_t * btn1 = lv_btn_create(gui_screen.main_scr_1, NULL);         /*Create a button on the screen*/
-    lv_obj_set_pos(btn1, 5, 5);              	   /*Set the position of the button*/
-    //lv_obj_set_event_cb(btn1, my_event_cb);   /*Assign an event callback*/
-    lv_obj_set_size(btn1, 65,22);
-
-    lv_obj_t * btn2 = lv_btn_create(gui_screen.main_scr_2, NULL);         /*Copy the first button*/
-    lv_obj_set_pos(btn2, 80, 5);                    /*Set the position of the button*/
-    //lv_obj_set_event_cb(btn2, my_event_cb);   /*Assign an event callback*/
-    lv_obj_set_size(btn2, 65,22);
-
-
-    lv_obj_t * label1 = lv_label_create(btn1, NULL);	/*Create a label on the first button*/
-    lv_label_set_text(label1, "Button 1");          	/*Set the text of the label*/
-
-    lv_obj_t * label2 = lv_label_create(btn2, NULL);  	/*Create a label on the second button*/
-    lv_label_set_text(label2, "Button 2");
-
-    /*Create an object with the style_top_bar*/
-    lv_obj_t * top_bar = lv_obj_create(gui_screen.main_scr_1, NULL);
-    lv_obj_set_size(top_bar, 160,24);
-    lv_obj_add_style(top_bar, LV_OBJ_PART_MAIN, &gui_screen.gui_style.style_top_bar);
-    lv_obj_align(top_bar, NULL, LV_ALIGN_IN_TOP_MID, 0, 0);
-
-    lv_obj_t * bot_bar = lv_obj_create(gui_screen.main_scr_1, NULL);
-    lv_obj_set_size(bot_bar, 160,80);
-    lv_obj_add_style(bot_bar, LV_OBJ_PART_MAIN, &gui_screen.gui_style.style_top_bar);
-    lv_obj_align(bot_bar, NULL, LV_ALIGN_IN_BOTTOM_MID, 0, 0);
-
-    lv_obj_t * test_icon = lv_obj_create(gui_screen.main_scr_1, NULL);
-    lv_obj_set_size(test_icon, 80,18);
-    lv_obj_add_style(test_icon, LV_OBJ_PART_MAIN, &gui_screen.gui_style.style_icon);
-    lv_obj_align(test_icon, NULL, LV_ALIGN_IN_TOP_LEFT, 3, 3);
-
-    lv_obj_t * test_icon2 = lv_obj_create(gui_screen.main_scr_1, NULL);
-    lv_obj_set_size(test_icon2, 80,18);
-    lv_obj_add_style(test_icon2, LV_OBJ_PART_MAIN, &gui_screen.gui_style.style_icon);
-    lv_obj_align(test_icon2, NULL, LV_ALIGN_IN_TOP_LEFT, 3, 24);
-
-    lv_obj_t * test_icon3 = lv_obj_create(gui_screen.main_scr_1, NULL);
-    lv_obj_set_size(test_icon3, 80,18);
-    lv_obj_add_style(test_icon3, LV_OBJ_PART_MAIN, &gui_screen.gui_style.style_icon);
-    lv_obj_align(test_icon3, NULL, LV_ALIGN_IN_TOP_LEFT, 3, 45);
-
-    lv_obj_t * bat_icon_small;
-    bat_icon_small = lv_img_create(gui_screen.main_scr_1, NULL);
-    lv_img_set_src(bat_icon_small, &battery_icon_small);
-    lv_obj_align_origo(bat_icon_small, NULL, LV_ALIGN_IN_TOP_LEFT, 136, 11);
-
-    lv_obj_t * icon_mah;
-    icon_mah = lv_img_create(test_icon, NULL);
-    lv_img_set_src(icon_mah, &mah_icon);
-    lv_obj_align_origo(icon_mah, test_icon, LV_ALIGN_IN_LEFT_MID, 15, 0);
-
-
-    gui_screen.bat_percent = lv_label_create(bat_icon_small, NULL);
-    lv_label_set_text(gui_screen.bat_percent, bat_perc);
-    //lv_obj_add_style(gui_screen.bat_percent, LV_OBJ_PART_MAIN, &gui_screen.gui_style.style_top_bar);
-    lv_obj_set_style_local_text_color(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_WHITE);
-    lv_obj_align_origo(gui_screen.bat_percent, NULL, LV_ALIGN_CENTER, -1, 0);
-#endif
-
-    gui_screen.icon_bat_big = lv_obj_create(gui_screen.main_screen, NULL);
+    gui_screen.icon_bat_big = lv_obj_create(gui_screen.main_scr, NULL);
     lv_obj_set_size(gui_screen.icon_bat_big, 108,56);
     lv_obj_add_style(gui_screen.icon_bat_big, LV_OBJ_PART_MAIN, &gui_style.style_big_bat);
     lv_obj_align(gui_screen.icon_bat_big, NULL, LV_ALIGN_CENTER, -6, 0);
 
     lv_obj_t * icon_bat_tail;
-    icon_bat_tail = lv_img_create(gui_screen.main_screen, NULL);
+    icon_bat_tail = lv_img_create(gui_screen.main_scr, NULL);
     lv_img_set_src(icon_bat_tail, &big_bat_tail_icon);
     lv_obj_align_origo(icon_bat_tail, NULL, LV_ALIGN_IN_RIGHT_MID, -23, 0);
 
-    gui_screen.fill_icon_bat_big = lv_obj_create(gui_screen.main_screen, NULL);
+    gui_screen.fill_icon_bat_big = lv_obj_create(gui_screen.main_scr, NULL);
     lv_obj_set_size(gui_screen.fill_icon_bat_big, 100,48);
     lv_obj_add_style(gui_screen.fill_icon_bat_big, LV_OBJ_PART_MAIN, &gui_style.style_fill_bat);
     lv_obj_align(gui_screen.fill_icon_bat_big, NULL, LV_ALIGN_CENTER, -6, 0);
 
 
-    gui_screen.bat_percent = lv_label_create(gui_screen.main_screen, NULL);
+    gui_screen.bat_percent = lv_label_create(gui_screen.main_scr, NULL);
     lv_label_set_text(gui_screen.bat_percent, bat_perc);
     lv_obj_set_style_local_text_color(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_WHITE);
     lv_obj_set_style_local_text_sel_bg_color(gui_screen.bat_percent, LV_OBJ_PART_MAIN, LV_STATE_DEFAULT, LV_COLOR_RED);
@@ -221,7 +152,7 @@ void gui_main_screen(void)
 
 
     lv_group_add_obj(group, gui_screen.bat_percent);
-    lv_group_add_obj(group, gui_screen.main_screen);
+    lv_group_add_obj(group, gui_screen.main_scr);
     //lv_group_add_obj(group, gui_screen.main_scr_1);
 
 }
@@ -264,12 +195,12 @@ void gui_update_value(void)
 
         case GUI_PRINT_PERCENT:
         {
-            if (battery_status->percent == 100)
-                sprintf(bat_perc, "  %d%%", battery_status->percent);
-            else if (battery_status->percent < 100 && battery_status->percent > 10)
-                sprintf(bat_perc, "   %d%%", battery_status->percent);
+            if (battery_status->percent_unfiltered == 100)
+                sprintf(bat_perc, "  %d%%", battery_status->percent_unfiltered);
+            else if (battery_status->percent < 100 && battery_status->percent_unfiltered > 10)
+                sprintf(bat_perc, "   %d%%", battery_status->percent_unfiltered);
             else
-                sprintf(bat_perc, "    %d%%", battery_status->percent);
+                sprintf(bat_perc, "    %d%%", battery_status->percent_unfiltered);
         }
             break;
 
@@ -282,7 +213,16 @@ void gui_update_value(void)
             break;
 
         case GUI_PRINT_TIME:
-            sprintf(bat_perc, "1h22min");
+        {
+            uint16_t time;
+            if (battery_status->current < 0){
+                time = (float) ((((float)battery_status->capacity / (float) battery_status->current) * -1) * 60);
+                sprintf(bat_perc, "%dh%dmin", time / 60, time % 60);
+            }
+            else {
+                sprintf(bat_perc, "Charging");
+            }
+        }
             break;
 
         default:
@@ -291,7 +231,7 @@ void gui_update_value(void)
     }
 
     lv_label_set_text(gui_screen.bat_percent, bat_perc);
-    gui_set_bat_percent(battery_status->percent);
+    gui_set_bat_percent(battery_status->percent_unfiltered);
 
 }
 

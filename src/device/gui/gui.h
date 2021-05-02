@@ -7,26 +7,28 @@
 
 typedef struct {
     /** Screens */
-    lv_obj_t * main_screen;
-    lv_obj_t * menu_screen;
-    lv_obj_t * settings_screen;
+    lv_obj_t *main_scr;
+    lv_obj_t *menu_scr;
+    lv_obj_t *settings_scr;
+    lv_obj_t *setup_buzzer_scr;
+    lv_obj_t *setup_timer_scr;
 
     /** Icons main screen */
-    lv_obj_t * bat_percent;
-    lv_obj_t * fill_icon_bat_big;
-    lv_obj_t * icon_bat_big;
-    lv_obj_t * button;
+    lv_obj_t *bat_percent;
+    lv_obj_t *fill_icon_bat_big;
+    lv_obj_t *icon_bat_big;
+    lv_obj_t *button;
 
     /** Image icons menu screen */
-    lv_obj_t * icon_1;
-    lv_obj_t * icon_2;
-    lv_obj_t * icon_3;
+    lv_obj_t *icon_1;
+    lv_obj_t *icon_2;
+    lv_obj_t *icon_3;
 
 } gui_screen_t;
 
 void gui_init(void);
 
-lv_group_t* gui_get_focus_obj(void);
+lv_group_t* gui_get_group_focus_obj(void);
 
 char* gui_debug_event(lv_event_t event);
 

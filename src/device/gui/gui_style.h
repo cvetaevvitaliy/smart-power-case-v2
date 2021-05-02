@@ -8,12 +8,14 @@ typedef struct {
     lv_anim_path_t path_ease_in_out;
     lv_anim_path_t path_overshoot;
     lv_style_t style_gum;
+    lv_style_t style_spin;
 
 } gui_animation_t;
 
 typedef struct
 {
     lv_style_t style_screen;
+    lv_style_t style_page;
     lv_style_t style_top_bar;
     lv_style_t style_bot_bar;
     lv_style_t style_window;

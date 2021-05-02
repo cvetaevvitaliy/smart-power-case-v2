@@ -10,13 +10,22 @@
 #include "display.h"
 #include "lvgl.h"
 #include "gui_main_screen.h"
+#include "imu.h"
+#include "eeprom.h"
 
 osThreadId cli_task_handle;
 osThreadId lvgl_task_handle;
 osThreadId power_task_handle;
+osThreadId acc_task_handle;
 void cli_task(void const * argument);
 void lvgl_task(void const * argument);
 void power_task(void const * argument);
+void acc_task(void const * argument);
+
+#ifdef DEBUG
+static CLI_Result_t i2c_scan(void);
+extern I2C_HandleTypeDef hi2c1;
+#endif
 
 int main(void)
 {
@@ -31,6 +40,9 @@ int main(void)
     osThreadDef(power_task, power_task, osPriorityNormal, 0, 512);
     power_task_handle = osThreadCreate(osThread(power_task), NULL);
 
+    osThreadDef(acc_task, acc_task, osPriorityHigh, 0, 1024);
+    acc_task_handle = osThreadCreate(osThread(acc_task), NULL);
+
     osKernelStart();
 
     while (1)
@@ -40,8 +52,36 @@ int main(void)
 
 }
 
+
+void acc_task(void const * argument)
+{
+
+    if (imu_init() == -1) {
+        osThreadSuspend(acc_task_handle);
+    }
+
+    while (1)
+    {
+        //imu_loop();
+
+        osDelay(100);
+    }
+
+}
+
 void cli_task(void const * argument)
 {
+#ifdef DEBUG
+    cli_add_new_cmd("i2c_scan", i2c_scan, 0, CLI_PrintNone, "i2c scan bus");
+    eeprom_CliCommand();
+//    eepromData_t test;
+//
+//    test.batMah = 1234;
+//    test.buzzerState = 332323;
+//    test.timerOff = 43242;
+//    test.chargeCurrent = 2000;
+//    eeprom_SaveSettings(&test);
+#endif
 
     while (1)
     {
@@ -70,11 +110,41 @@ void power_task(void const * argument)
     {
         Power_Loop();
         Battery_Loop();
-        osDelay(200);
+        osDelay(500);
     }
 
 }
 
+#ifdef DEBUG
+/** Device scaner For debug i2c device */
+CLI_Result_t i2c_scan(void)
+{
+    HAL_StatusTypeDef ret;
+    CLI_PRINTF("\nStart scanning i2c bus:\n");
+
+    // table header
+    CLI_PRINTF("  ");
+    for (uint8_t i = 0; i < 16; i++) {
+        CLI_PRINTF("%3x", i);
+    }
+
+    // table body
+    for (uint8_t address = 0; address <= 119; address++) {
+        if (address % 16 == 0) {
+            CLI_PRINTF("\n%02x:", address & 0xF0);
+        }
+        ret = HAL_I2C_IsDeviceReady(&hi2c1, (uint16_t) (address << 1), 2, 5);
+        if (ret == HAL_OK) {
+            CLI_PRINTF(" %02x", address); // device found
+        } else {
+            CLI_PRINTF(" --");
+        }
+    }
+    CLI_PRINTF("\n");
+
+    return CLI_OK;
+}
+#endif
 
 /**
   * @brief  This function is executed in case of error occurrence.
@@ -84,6 +154,7 @@ void power_task(void const * argument)
   */
 void _Error_Handler(char *file, int line)
 {
+    ULOG_ERROR("%s(): %d\r\n", file, line);
     while(1){
     }
 }

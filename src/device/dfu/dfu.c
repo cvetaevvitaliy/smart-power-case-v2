@@ -3,18 +3,17 @@
 #include "stm32f4xx_hal.h"
 #include "cli.h"
 
-static CLI_Result_t _dfu(void);
+static CLI_Result_t dfu(void);
 typedef void (*ptr)(void);
+extern RTC_HandleTypeDef hrtc;
 
 uint8_t dfu_add_cli_cmd(void)
 {
-    return cli_add_new_cmd("dfu", _dfu, 0, 0, "Reboot to DFU");
+    return cli_add_new_cmd("dfu", dfu, 0, 0, "Reboot to DFU");
 }
 
 
-extern RTC_HandleTypeDef hrtc;
-
-CLI_Result_t _dfu(void)
+CLI_Result_t dfu(void)
 {
     HAL_RTCEx_BKUPWrite(&hrtc, RTC_BKP_DR0, MAGIC_DFU_VALUE);
     HAL_Delay(10);

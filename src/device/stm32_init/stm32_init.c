@@ -498,6 +498,11 @@ void USB_Reset(void)
 
 }
 
+RTC_HandleTypeDef *STM32_GetRtcHandle(void)
+{
+    return &hrtc;
+}
+
 /** RTC init function */
 static void MX_RTC_Init(void)
 {

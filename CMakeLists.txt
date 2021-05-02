@@ -17,12 +17,13 @@ add_definitions(-DPATCH=\"${VERSION_PATCH}\")
 # Get git hash ang git branch name
 find_package(Git)
 if(GIT_FOUND)
+    message("git found: ${GIT_EXECUTABLE} in version ${GIT_VERSION_STRING}")
     # get git branch name
-    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD COMMAND cut -c1-10 OUTPUT_VARIABLE GIT_BRANCH)
+    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD COMMAND cut -c1-10 OUTPUT_VARIABLE GIT_BRANCH WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
     string(STRIP "${GIT_BRANCH}" GIT_BRANCH)
 
     # get git hash
-    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --short=8 HEAD OUTPUT_VARIABLE GIT_HASH)
+    execute_process(COMMAND ${GIT_EXECUTABLE} rev-parse --short=8 HEAD OUTPUT_VARIABLE GIT_HASH WORKING_DIRECTORY ${CMAKE_SOURCE_DIR})
     string(STRIP "${GIT_HASH}" GIT_HASH)
 
 else()
@@ -48,7 +49,7 @@ set(CMAKE_OBJCOPY arm-none-eabi-objcopy)
 set(CMAKE_OBJDUMP arm-none-eabi-objdump)
 set(SIZE arm-none-eabi-size)
 
-SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/src/stm32_device_library/ld_script/STM32F411CEUx_FLASH.ld)
+SET(LINKER_SCRIPT ${CMAKE_SOURCE_DIR}/src/stm32/ld_script/STM32F411CEUx_FLASH.ld)
 
 # Hardware floating point
 SET(FPU_FLAGS "-mfloat-abi=hard -mfpu=fpv4-sp-d16")
@@ -85,12 +86,12 @@ set(FreeRTOS_INC
 
 # Source files
 file(GLOB_RECURSE SOURCES
-        "src/stm32_device_library/startup/startup_stm32f411xe.s"
+        "src/stm32/startup/startup_stm32f411xe.s"
         ${FreeRTOS_SRC}
 
-        "src/stm32_device_library/STM32F4xx_HAL_Driver/Src/*.c"
-        "src/stm32_device_library/STM32_USB_Device_Library/Class/CDC/Src/*.c"
-        "src/stm32_device_library/STM32_USB_Device_Library/Core/Src/*.*"
+        "src/stm32/STM32F4xx_HAL_Driver/Src/*.c"
+        "src/stm32/STM32_USB_Device_Library/Class/CDC/Src/*.c"
+        "src/stm32/STM32_USB_Device_Library/Core/Src/*.*"
         "src/device/stm32_hal_config/stm32f4xx_hal_timebase_TIM.c"
 
         "src/device/stm32_hal_config/system_stm32f4xx.c"
@@ -105,7 +106,8 @@ file(GLOB_RECURSE SOURCES
         "src/device/usbd/usbd_conf.c"
         "src/device/usbd/usbd_desc.c"
 
-        "src/components/dfu/dfu.c"
+        "src/device/dfu/dfu.c"
+        "src/device/eeprom/eeprom.c"
 
         "src/device/stm32_init/stm32_init.c"
         "src/device/stm32_init/charger.c"
@@ -136,6 +138,9 @@ file(GLOB_RECURSE SOURCES
         "src/device/display/lv_demo_keypad_encoder.c"
         "src/device/gui/*.c"
         "src/device/gui/icon/*.c"
+        "src/device/gui/screens/*.c"
+
+        "src/device/imu/*.c"
 
         "src/main.c")
 
@@ -143,19 +148,20 @@ file(GLOB_RECURSE SOURCES
 # Include dirs
 include_directories(
         ${FreeRTOS_INC}
-        src/stm32_device_library/CMSIS/Include
-        src/stm32_device_library/CMSIS/Device/ST/STM32F4xx/Include
-        src/stm32_device_library/STM32_USB_Device_Library/Core/Inc
-        src/stm32_device_library/STM32_USB_Device_Library/Class/CDC/Inc
-        src/stm32_device_library/STM32F4xx_HAL_Driver/Inc
-        src/stm32_device_library/STM32F4xx_HAL_Driver/Inc/Legacy
+        src/stm32/CMSIS/Include
+        src/stm32/CMSIS/Device/ST/STM32F4xx/Include
+        src/stm32/STM32_USB_Device_Library/Core/Inc
+        src/stm32/STM32_USB_Device_Library/Class/CDC/Inc
+        src/stm32/STM32F4xx_HAL_Driver/Inc
+        src/stm32/STM32F4xx_HAL_Driver/Inc/Legacy
 
         src/components/delay
 
         src/device/stm32_hal_config
         src/device/usbd
 
-        src/components/dfu
+        src/device/dfu
+        src/device/eeprom
 
         src/components/tinystring
         src/components/tinyprintf
@@ -175,6 +181,9 @@ include_directories(
         src/device/tasks
         src/device/gui
         src/device/gui/icon
+        src/device/gui/screens
+
+        src/device/imu
 
         src/components/st7735s
         src/components/st7735s/fonts
@@ -233,4 +242,6 @@ ${BIN_FILE}
 File details, format berkeley:")
 
 add_custom_target(flash
+        COMMAND arm-none-eabi-size --format=berkeley ${PROJECT_NAME}.elf
+        COMMAND ${CMAKE_OBJCOPY} -Obinary $<TARGET_FILE:${PROJECT_NAME}.elf> ${BIN_FILE}
         COMMAND dfu-util -a 0 -s 0x08000000:leave -D ${BIN_FILE} -w)

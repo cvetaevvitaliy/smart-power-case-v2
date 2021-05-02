@@ -11,6 +11,8 @@
 #include "gui_main_screen.h"
 #include "gui_menu_screen.h"
 #include "gui_settings_screen.h"
+#include "gui_setup_buzzer.h"
+#include "gui_setup_timer.h"
 
 static lv_indev_t * indev_keypad;
 lv_group_t*  group;
@@ -46,33 +48,7 @@ static void focus_cb(lv_group_t * cur_group)
 {
     lv_obj_t *obj = lv_group_get_focused(cur_group);
 
-#if 0
-    ULOG_DEBUG("obj: %d\n", obj);
-    if (obj == gui_obj_settings_scr.check_box)
-    {
-        lv_page_focus(gui_screen.settings_screen, obj, LV_ANIM_ON);
-    }
-
-    if (obj == gui_obj_settings_scr.check_box_2)
-    {
-        lv_page_focus(gui_screen.settings_screen, obj, LV_ANIM_ON);
-    }
-
-    if (obj == gui_obj_settings_scr.check_box_3)
-    {
-        lv_page_focus(gui_screen.settings_screen, obj, LV_ANIM_ON);
-    }
-
-    if (obj == gui_obj_settings_scr.check_box_4)
-    {
-        lv_page_focus(gui_screen.settings_screen, obj, LV_ANIM_ON);
-    }
-    if (obj == gui_obj_settings_scr.check_box_5)
-    {
-        lv_page_focus(gui_screen.settings_screen, obj, LV_ANIM_ON);
-    }
-#endif
-
+    gui_settings_scr_set_actual_focus(obj);
 
 }
 
@@ -104,7 +80,7 @@ void gui_init(void)
     lv_group_set_focus_cb(group, focus_cb);
 
 
-    lv_indev_t* cur_drv = NULL;
+    lv_indev_t *cur_drv = NULL;
     while (1) {
         cur_drv = lv_indev_get_next(cur_drv);
         if (!cur_drv) {
@@ -125,10 +101,14 @@ void gui_init(void)
 
     gui_settings_screen();
 
+    gui_setup_buzzer();
+
+    gui_setup_timer();
+
 }
 
 
-lv_group_t* gui_get_focus_obj(void)
+lv_group_t* gui_get_group_focus_obj(void)
 {
     return group;
 }

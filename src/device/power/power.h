@@ -16,11 +16,20 @@ typedef struct
 
 } Power_Status_t;
 
+typedef enum {
+    POWER_OFF_ALL = 0,
+    POWER_OFF_MCU,
+    POWER_OFF_LCD,
+    POWER_OFF_ACC,
+    POWER_OFF_CHARGE_CHIP,
+} Power_Off_e;
+
 
 bool Power_InitChargerChip(void);
 
 void Power_Loop(void);
 
 Power_Status_t *Power_GetStatus(void);
+void Power_PowerOff(Power_Off_e type);
 
 #endif //SMART_POWER_CASE_V2_POWER_H
