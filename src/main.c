@@ -62,6 +62,7 @@ void AccTask(void const * argument)
 {
     UNUSED_ARG(argument);
 
+    // @note if IMU not found = suspend execution of IMU task
     if (imu_Init() == -1) {
         osThreadSuspend(acc_task_handle);
     }
