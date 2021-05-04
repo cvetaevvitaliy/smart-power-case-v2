@@ -92,7 +92,7 @@ void gui_setup_buzzer(void)
 
     /** Create screen */
     gui_screen.setup_buzzer_scr = lv_obj_create(NULL, NULL);
-    //lv_obj_set_event_cb(gui_screen.settings_screen, event_settings_scr);   /*Assign an event callback*/
+    //lv_obj_set_event_cb(gui_screen.setup_buzzer_scr, event_settings_scr);
     lv_obj_add_style(gui_screen.setup_buzzer_scr, LV_OBJ_PART_MAIN, &gui_style.style_screen);
 
     /** Create top bar with the style_top_bar */
@@ -123,13 +123,13 @@ void gui_setup_buzzer(void)
     /** Create Accept icon */
     accept_ico = lv_img_create(gui_screen.setup_buzzer_scr, NULL);
     lv_img_set_src(accept_ico, &accept_icon);
-    lv_obj_align(accept_ico, NULL, LV_ALIGN_CENTER, -17, 25);
+    lv_obj_align(accept_ico, NULL, LV_ALIGN_CENTER, -17, 23);
     lv_obj_set_event_cb(accept_ico, accept_event_handler);
 
     /** Create Cancel icon */
     cancel_ico = lv_img_create(gui_screen.setup_buzzer_scr, NULL);
     lv_img_set_src(cancel_ico, &cancel_icon);
-    lv_obj_align(cancel_ico, NULL, LV_ALIGN_CENTER, 15, 25);
+    lv_obj_align(cancel_ico, NULL, LV_ALIGN_CENTER, 15, 23);
     lv_obj_set_event_cb(cancel_ico, cancel_event_handler);
 
     /** Applied Gum-like style for icons */

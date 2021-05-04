@@ -28,6 +28,7 @@ eepromData_t *eeprom_GetSettings(void)
     eepromData.timerOff = HAL_RTCEx_BKUPRead(rtc, RTC_BKP_DR4);
     eepromData.buzzerState = HAL_RTCEx_BKUPRead(rtc, RTC_BKP_DR5);
     eepromData.batMinVolt = HAL_RTCEx_BKUPRead(rtc, RTC_BKP_DR6);
+    eepromData.accState = HAL_RTCEx_BKUPRead(rtc, RTC_BKP_DR7);
 
     if (eepromData.goodData != EEPROM_GOOD_DATA)
         eeprom_ResetToDefaults();
@@ -47,6 +48,7 @@ void eeprom_SaveSettings(eepromData_t *data)
     HAL_RTCEx_BKUPWrite(rtc, RTC_BKP_DR4, data->timerOff);
     HAL_RTCEx_BKUPWrite(rtc, RTC_BKP_DR5, data->buzzerState);
     HAL_RTCEx_BKUPWrite(rtc, RTC_BKP_DR6, data->batMinVolt);
+    HAL_RTCEx_BKUPWrite(rtc, RTC_BKP_DR7, data->accState);
 }
 
 
@@ -60,6 +62,7 @@ static CLI_Result_t printEepromSettings(void)
     CLI_PRINTF("Timer auto-Off = %d min\r\n", data->timerOff);
     CLI_PRINTF("Buzzer state = %s\r\n", data->buzzerState ? "Enable" : "Disable");
     CLI_PRINTF("Bat min volt = %d V\r\n", data->batMinVolt);
+    CLI_PRINTF("Double ACC click event = %d V\r\n", data->accState);
     return CLI_OK;
 }
 
@@ -76,6 +79,7 @@ void eeprom_ResetToDefaults(void)
     eepromData.timerOff = 0;
     eepromData.buzzerState = 1;
     eepromData.batMinVolt = 2800;
+    eepromData.accState = 0;
 
     eeprom_SaveSettings(&eepromData);
 

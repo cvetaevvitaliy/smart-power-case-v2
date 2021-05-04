@@ -12,8 +12,12 @@
 #include "stdbool.h"
 #include "stdint.h"
 
-int imu_init(void);
+int imu_Init(void);
 
-void imu_loop(void);
+void imu_Loop(void);
+
+void imu_PowerOff(void);
+
+void imu_InitWakeUp(void);
 
 #endif //SMART_POWER_CASE_V2_IMU_H

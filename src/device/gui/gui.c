@@ -13,6 +13,7 @@
 #include "gui_settings_screen.h"
 #include "gui_setup_buzzer.h"
 #include "gui_setup_timer.h"
+#include "gui_setup_acc.h"
 
 static lv_indev_t * indev_keypad;
 lv_group_t*  group;
@@ -104,6 +105,8 @@ void gui_init(void)
     gui_setup_buzzer();
 
     gui_setup_timer();
+
+    gui_setup_acc();
 
 }
 

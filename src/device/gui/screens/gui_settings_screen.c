@@ -12,6 +12,7 @@
 #include "button.h"
 #include "gui_setup_buzzer.h"
 #include "gui_setup_timer.h"
+#include "gui_setup_acc.h"
 
 gui_settings_scr_t gui_obj_settings_scr = {0};
 extern gui_screen_t gui_screen;
@@ -75,6 +76,10 @@ static void event_handler_acc_icon(lv_obj_t * obj, lv_event_t event)
             break;
 
         case LV_EVENT_SHORT_CLICKED:
+            /** Remove all object in focus joystick and add new objects for focus */
+            lv_group_remove_all_objs(gui_get_group_focus_obj());
+            gui_setup_acc_enable_focus();
+            lv_scr_load(gui_screen.setup_acc_scr);
             break;
 
         default:

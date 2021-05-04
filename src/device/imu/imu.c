@@ -41,7 +41,7 @@ static int32_t platform_read(void *handle, uint8_t reg, uint8_t *bufp, uint16_t 
     return 0;
 }
 
-int imu_init(void)
+int imu_Init(void)
 {
     lis3dh_ctrl_reg3_t ctrl_reg3;
     lis3dh_click_cfg_t click_cfg;
@@ -99,7 +99,7 @@ int imu_init(void)
     return 0;
 }
 
-void imu_loop(void)
+void imu_Loop(void)
 {
 #if 0 // for debug
     int16_t data_raw_acceleration[3] = {0};
@@ -154,5 +154,51 @@ void imu_loop(void)
         ULOG_DEBUG("d-click detected : x %d, y %d, z %d, sign %d\r\n", src.x, src.y, src.z, src.sign);
         time = HAL_GetTick();
     }
+
+}
+
+void imu_PowerOff(void)
+{
+    lis3dh_data_rate_set(&dev_ctx, LIS3DH_POWER_DOWN);
+}
+
+void imu_InitWakeUp(void)
+{
+
+    lis3dh_int1_cfg_t int1_cfg;
+    lis3dh_ctrl_reg3_t ctrl_reg3;
+    uint8_t dummy;
+
+    /* High-pass filter enabled on interrupt activity 1 */
+    lis3dh_high_pass_int_conf_set(&dev_ctx, LIS3DH_ON_INT1_GEN);
+    /* Enable HP filter for wake-up event detection
+     *
+     * Use this setting to remove gravity on data output */
+    lis3dh_high_pass_on_outputs_set(&dev_ctx, PROPERTY_ENABLE);
+    /* Enable AOI1 on int1 pin */
+    lis3dh_pin_int1_config_get(&dev_ctx, &ctrl_reg3);
+    ctrl_reg3.i1_ia1 = PROPERTY_ENABLE;
+    lis3dh_pin_int1_config_set(&dev_ctx, &ctrl_reg3);
+    /* Interrupt 1 pin latched */
+    lis3dh_int1_pin_notification_mode_set(&dev_ctx,LIS3DH_INT1_PULSED);
+    /* Set full scale to 2 g */
+    lis3dh_full_scale_set(&dev_ctx, LIS3DH_2g);
+    /* Set interrupt threshold to 0x10 -> 250 mg */
+    lis3dh_int1_gen_threshold_set(&dev_ctx, 0x10);
+    /* Set no time duration */
+    lis3dh_int1_gen_duration_set(&dev_ctx, 0);
+    /* Dummy read to force the HP filter to current acceleration value. */
+    lis3dh_filter_reference_get(&dev_ctx, &dummy);
+    /* Configure wake-up interrupt event on all axis */
+    lis3dh_int1_gen_conf_get(&dev_ctx, &int1_cfg);
+    int1_cfg.zhie = PROPERTY_ENABLE;
+    int1_cfg.yhie = PROPERTY_ENABLE;
+    int1_cfg.xhie = PROPERTY_ENABLE;
+    int1_cfg.aoi = PROPERTY_DISABLE;
+    lis3dh_int1_gen_conf_set(&dev_ctx, &int1_cfg);
+    /* Set device in HR mode */
+    lis3dh_operating_mode_set(&dev_ctx, LIS3DH_HR_12bit);
+    /* Set Output Data Rate to 100 Hz */
+    lis3dh_data_rate_set(&dev_ctx, LIS3DH_ODR_100Hz);
 
 }

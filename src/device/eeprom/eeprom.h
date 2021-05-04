@@ -19,6 +19,7 @@ typedef struct {
     uint32_t batMinVolt;
     uint32_t timerOff;
     uint32_t buzzerState;
+    uint32_t accState;
 
 } eepromData_t;
 

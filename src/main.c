@@ -55,13 +55,13 @@ int main(void)
 void acc_task(void const * argument)
 {
 
-    if (imu_init() == -1) {
+    if (imu_Init() == -1) {
         osThreadSuspend(acc_task_handle);
     }
 
     while (1)
     {
-        imu_loop();
+        imu_Loop();
 
         osDelay(100);
     }

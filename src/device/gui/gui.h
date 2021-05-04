@@ -12,6 +12,7 @@ typedef struct {
     lv_obj_t *settings_scr;
     lv_obj_t *setup_buzzer_scr;
     lv_obj_t *setup_timer_scr;
+    lv_obj_t *setup_acc_scr;
 
     /** Icons main screen */
     lv_obj_t *bat_percent;

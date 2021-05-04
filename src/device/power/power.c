@@ -6,6 +6,7 @@
 #include "cli.h"
 #include "cmsis_os.h"
 #include "eeprom.h"
+#include "imu.h"
 
 extern I2C_HandleTypeDef hi2c1;
 static Power_Status_t Power_status = {0};
@@ -124,6 +125,7 @@ void Power_PowerOff(Power_Off_e type)
     switch (type)
     {
         case POWER_OFF_ALL:
+            imu_PowerOff();
             HAL_GPIO_WritePin(LCD_EN_GPIO_PORT, LCD_EN_PIN, GPIO_PIN_RESET);
             bq2589x_enter_ship_mode();
             bq2589x_enter_hiz_mode();
