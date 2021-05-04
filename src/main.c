@@ -1,7 +1,7 @@
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "stm32_init.h"
-#include "device_tasks.h"
+#include "hardware.h"
 #include "cmsis_os.h"
 #include "cli.h"
 #include "cli.h"
@@ -45,9 +45,6 @@ int main(void)
     osThreadDef(AccTask, AccTask, osPriorityNormal, 0, 1024);
     acc_task_handle = osThreadCreate(osThread(AccTask), NULL);
 
-    osThreadDef(acc_task, AccTask, osPriorityNormal, 0, 1024);
-    acc_task_handle = osThreadCreate(osThread(acc_task), NULL);
-
     osKernelStart();
 
     while (1)
@@ -65,10 +62,7 @@ void AccTask(void const * argument)
 {
     UNUSED_ARG(argument);
 
-    if (imu_Init() == -1) {
-        osThreadSuspend(acc_task_handle);
-    }
-
+    // @note if IMU not found = suspend execution of IMU task
     if (imu_Init() == -1) {
         osThreadSuspend(acc_task_handle);
     }
@@ -139,7 +133,11 @@ void PowerTask(void const * argument)
 }
 
 #ifdef DEBUG
- /** @brief Linux like i2c bus scanner */
+/** Device scaner For debug i2c device */
+
+/**
+ * @brief Linux like i2c bus scanner
+ */
 CLI_Result_t i2c_scan(void)
 {
     I2C_HandleTypeDef *i2c = STM32_GetI2CHandle();

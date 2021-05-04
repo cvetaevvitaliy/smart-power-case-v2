@@ -13,7 +13,6 @@ void USB_Reset(void);
  */
 RTC_HandleTypeDef *STM32_GetRtcHandle(void);
 
-
 /**
  * @brief  Ger I2C Handle Structure definition
  * @return pointer to RTC_HandleTypeDef struct
