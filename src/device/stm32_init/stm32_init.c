@@ -503,6 +503,11 @@ RTC_HandleTypeDef *STM32_GetRtcHandle(void)
     return &hrtc;
 }
 
+I2C_HandleTypeDef *STM32_GetI2CHandle(void)
+{
+    return &hi2c1;
+}
+
 /** RTC init function */
 static void MX_RTC_Init(void)
 {
