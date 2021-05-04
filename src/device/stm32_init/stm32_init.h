@@ -14,4 +14,11 @@ void USB_Reset(void);
 RTC_HandleTypeDef *STM32_GetRtcHandle(void);
 
 
+/**
+ * @brief  Ger I2C Handle Structure definition
+ * @return pointer to RTC_HandleTypeDef struct
+ */
+I2C_HandleTypeDef *STM32_GetI2CHandle(void);
+
+
 #endif //SMART_POWER_CASE_V2_STM32_INIT_H

@@ -7,7 +7,7 @@
 #include "display.h"
 
 
-void Services_Init(void)
+void Hardware_Init(void)
 {
     STM32_Init();
     Power_InitChargerChip();

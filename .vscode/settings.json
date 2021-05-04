@@ -1,6 +1,0 @@
-{
-    "files.associations": {
-        "cli.h": "c",
-        "cli_config.h": "c"
-    }
-}
