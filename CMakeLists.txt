@@ -129,7 +129,7 @@ file(GLOB_RECURSE SOURCES
         "src/device/button/button.c"
         "src/device/display/display.c"
         "src/device/power/power.c"
-        "src/device/components_init/hardware.c"
+        "src/device/hardware.c"
 
         "src/components/st7735s/st7735s.c"
         "src/components/st7735s/fonts/*.*"
@@ -178,7 +178,7 @@ include_directories(
         src/device/button
         src/device/display
         src/device/power
-        src/device/components_init
+        src/device
         src/device/gui
         src/device/gui/icon
         src/device/gui/screens

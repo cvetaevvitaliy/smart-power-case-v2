@@ -8,7 +8,7 @@
 
 #ifndef SMART_POWER_CASE_V2_IMU_H
 #define SMART_POWER_CASE_V2_IMU_H
-#include "device_config.h"
+#include "hw_config.h"
 #include "stdbool.h"
 #include "stdint.h"
 

@@ -1,5 +1,5 @@
-#ifndef SMART_POWER_CASE_V2_DEVICE_CONFIG_H
-#define SMART_POWER_CASE_V2_DEVICE_CONFIG_H
+#ifndef SMART_POWER_CASE_V2_HW_CONFIG_H
+#define SMART_POWER_CASE_V2_HW_CONFIG_H
 
 #define WKUP_PIN GPIO_PIN_0
 #define WKUP_GPIO_PORT GPIOA
@@ -45,4 +45,4 @@
 #define TAPER_CURRENT              150      // Current cut-off charging for BQ25895 and BQ27441
 #define MAX_VOLTAGE_LIION          4200     // Max charge voltage for battery
 
-#endif //SMART_POWER_CASE_V2_DEVICE_CONFIG_H
+#endif //SMART_POWER_CASE_V2_HW_CONFIG_H

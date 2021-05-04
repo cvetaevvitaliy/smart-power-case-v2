@@ -1,6 +1,6 @@
 #ifndef SMART_POWER_CASE_V2_MAIN_H
 #define SMART_POWER_CASE_V2_MAIN_H
-#include "device_config.h"
+#include "hw_config.h"
 
 
 void _Error_Handler(char *, int);

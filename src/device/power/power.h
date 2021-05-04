@@ -1,6 +1,6 @@
 #ifndef SMART_POWER_CASE_V2_POWER_H
 #define SMART_POWER_CASE_V2_POWER_H
-#include "device_config.h"
+#include "hw_config.h"
 #include "stdbool.h"
 #include "stdint.h"
 #include "bq2589x_charger.h"
