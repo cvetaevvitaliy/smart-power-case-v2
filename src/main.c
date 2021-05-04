@@ -1,7 +1,7 @@
 #include "main.h"
 #include "stm32f4xx_hal.h"
 #include "stm32_init.h"
-#include "device_tasks.h"
+#include "hardware.h"
 #include "cmsis_os.h"
 #include "cli.h"
 #include "cli.h"

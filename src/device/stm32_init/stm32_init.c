@@ -54,9 +54,6 @@ void STM32_Init(void)
     MX_SPI1_Init();
     MX_TIM1_Init();
     MX_USART1_UART_Init();
-//    USB_Reset();
-//    MX_USB_DEVICE_Init();
-    //MX_TIM2_Init();
     MX_TIM3_Init();
     MX_TIM10_Init();
     MX_TIM4_Init();

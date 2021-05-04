@@ -1,4 +1,4 @@
-#include "device_tasks.h"
+#include "hardware.h"
 #include "stm32_init.h"
 #include "cli.h"
 #include "dfu.h"
@@ -19,11 +19,3 @@ void Hardware_Init(void)
 
 }
 
-
-void Services_Loop(void)
-{
-    cli_loop_service();
-    Power_Loop();
-    Display_Loop();
-    Battery_Loop();
-}

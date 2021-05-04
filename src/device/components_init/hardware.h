@@ -1,0 +1,6 @@
+#ifndef SMART_POWER_CASE_V2_HARDWARE_H
+#define SMART_POWER_CASE_V2_HARDWARE_H
+
+void Hardware_Init(void);
+
+#endif //SMART_POWER_CASE_V2_HARDWARE_H
