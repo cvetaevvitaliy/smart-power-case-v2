@@ -40,7 +40,7 @@ int main(void)
     osThreadDef(power_task, power_task, osPriorityNormal, 0, 512);
     power_task_handle = osThreadCreate(osThread(power_task), NULL);
 
-    osThreadDef(acc_task, acc_task, osPriorityHigh, 0, 1024);
+    osThreadDef(acc_task, acc_task, osPriorityNormal, 0, 1024);
     acc_task_handle = osThreadCreate(osThread(acc_task), NULL);
 
     osKernelStart();
@@ -52,7 +52,6 @@ int main(void)
 
 }
 
-
 void acc_task(void const * argument)
 {
 
@@ -62,7 +61,7 @@ void acc_task(void const * argument)
 
     while (1)
     {
-        //imu_loop();
+        imu_loop();
 
         osDelay(100);
     }
@@ -73,15 +72,8 @@ void cli_task(void const * argument)
 {
 #ifdef DEBUG
     cli_add_new_cmd("i2c_scan", i2c_scan, 0, CLI_PrintNone, "i2c scan bus");
-    eeprom_CliCommand();
-//    eepromData_t test;
-//
-//    test.batMah = 1234;
-//    test.buzzerState = 332323;
-//    test.timerOff = 43242;
-//    test.chargeCurrent = 2000;
-//    eeprom_SaveSettings(&test);
 #endif
+    eeprom_CliCommand();
 
     while (1)
     {

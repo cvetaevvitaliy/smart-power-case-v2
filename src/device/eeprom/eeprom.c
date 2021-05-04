@@ -52,13 +52,14 @@ void eeprom_SaveSettings(eepromData_t *data)
 
 static CLI_Result_t printEepromSettings(void)
 {
+    CLI_PRINTF("\r\n");
     eepromData_t *data = eeprom_GetSettings();
 
-    ULOG_DEBUG("batMah = %d\r\n", data->batMah);
-    ULOG_DEBUG("chargeCurrent = %d\r\n", data->chargeCurrent);
-    ULOG_DEBUG("timerOff = %d\r\n", data->timerOff);
-    ULOG_DEBUG("buzzerState = %d\r\n", data->buzzerState);
-    ULOG_DEBUG("batMinVolt = %d\r\n", data->batMinVolt);
+    CLI_PRINTF("Capacity = %d maH\r\n", data->batMah);
+    CLI_PRINTF("Current charge = %d mA\r\n", data->chargeCurrent);
+    CLI_PRINTF("Timer auto-Off = %d min\r\n", data->timerOff);
+    CLI_PRINTF("Buzzer state = %s\r\n", data->buzzerState ? "Enable" : "Disable");
+    CLI_PRINTF("Bat min volt = %d V\r\n", data->batMinVolt);
     return CLI_OK;
 }
 

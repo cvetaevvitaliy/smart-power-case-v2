@@ -116,6 +116,7 @@ lv_group_t* gui_get_group_focus_obj(void)
 _unused
 char* gui_debug_event(lv_event_t event)
 {
+#ifdef DUBUG_EVENT
     static char* event_str = NULL;
 
     switch (event)
@@ -185,6 +186,10 @@ char* gui_debug_event(lv_event_t event)
 
 
     return event_str;
+#else
+    return "";
+#endif
+
 }
 
 
