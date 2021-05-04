@@ -48,27 +48,33 @@ static uint32_t keypad_get_key(void)
 
 static char* lv_key_to_str(uint32_t key)
 {
-    static char str[10] = {0};
+    static char *str;
 
     switch(key) {
         case LV_KEY_NEXT:
-            sprintf(str,"NEXT");
+            str = "NEXT";
             break;
         case LV_KEY_PREV:
-            sprintf(str,"PREV");
+            str = "PREV";
             break;
         case LV_KEY_LEFT:
-            sprintf(str,"LEFT");
+            str = "LEFT";
             break;
         case LV_KEY_RIGHT:
-            sprintf(str,"RIGHT");
+            str = "RIGHT";
             break;
         case LV_KEY_ENTER:
-            sprintf(str,"ENTER");
+            str = "ENTER";
+            break;
+        case LV_KEY_UP:
+            str = "UP";
+            break;
+        case LV_KEY_DOWN:
+            str = "DOWN";
             break;
 
         default:
-            sprintf(str,"UNKNOWN");
+            str = "UNKNOWN";
             break;
     }
 
@@ -89,16 +95,20 @@ bool keypad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
         /*Translate the keys to LVGL control characters according to your key definitions*/
         switch(act_key) {
             case 1:
-                act_key = LV_KEY_NEXT;
+                //act_key = LV_KEY_NEXT;
+                act_key = LV_KEY_UP;
                 break;
             case 2:
-                act_key = LV_KEY_PREV;
+                //act_key = LV_KEY_PREV;
+                act_key = LV_KEY_DOWN;
                 break;
             case 3:
-                act_key = LV_KEY_LEFT;
+                //act_key = LV_KEY_LEFT;
+                act_key = LV_KEY_PREV;
                 break;
             case 4:
-                act_key = LV_KEY_RIGHT;
+                //act_key = LV_KEY_RIGHT;
+                act_key = LV_KEY_NEXT;
                 break;
             case 5:
                 act_key = LV_KEY_ENTER;
@@ -109,7 +119,7 @@ bool keypad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
         }
 
         last_key = act_key;
-        ULOG_DEBUG("data->key: %s\n", lv_key_to_str(act_key));
+        //ULOG_DEBUG("data->key: %s\n", lv_key_to_str(act_key));
 
     } else {
         data->state = LV_INDEV_STATE_REL;
@@ -120,5 +130,6 @@ bool keypad_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data)
     /*Return `false` because we are not buffering and no more data to read*/
     return false;
 }
+
 
 

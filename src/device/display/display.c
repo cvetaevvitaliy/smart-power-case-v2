@@ -8,6 +8,7 @@
 #include "bq27441.h"
 #include "lvgl.h"
 #include "button.h"
+#include "gui.h"
 
 extern SPI_HandleTypeDef             hspi1;
 lv_indev_t * indev_keypad;
@@ -26,26 +27,6 @@ static void GPIO_Write(uint32_t port, uint32_t pin, uint8_t state)
     HAL_GPIO_WritePin( (GPIO_TypeDef*)port, pin, state);
 }
 
-void ST7735_flush(lv_disp_drv_t * drv, const lv_area_t * area,  lv_color_t * color_map)
-{
-    /** put all pixels to the screen one-by-one*/
-
-    int32_t x;
-    int32_t y;
-    for(y = area->y1; y <= area->y2; y++) {
-        for(x = area->x1; x <= area->x2; x++) {
-            /** put_px(x, y, *color_p)*/
-            LCD_ST7735S_DrawPixel(x, y, color_map->full);
-            color_map++;
-        }
-    }
-
-    LCD_ST7735S_Update();
-    /** IMPORTANT!!!
-     * Inform the graphics library that you are ready with the flushing */
-    lv_disp_flush_ready(drv);
-}
-
 
 static LCD_ST7735_ctx_t LCD_ST7735 = {
         .spi_write_data         = SPI_Transmit,     // register callback for write data to SPI
@@ -61,20 +42,6 @@ static LCD_ST7735_ctx_t LCD_ST7735 = {
 
 };
 
-void lv_tutorial_hello_world(void)
-{
-    /*Create a Label on the currently active screen*/
-    lv_obj_t * label1 =  lv_label_create(lv_scr_act(), NULL);
-
-    /*Modify the Label's text*/
-    //lv_label_set_text(label1, "Hello world!");
-    lv_label_set_text(label1, LV_SYMBOL_BATTERY_3);
-
-    /* Align the Label to the center
-     * NULL means align on parent (which is the screen now)
-     * 0, 0 at the end means an x, y offset after alignment*/
-    lv_obj_align(label1, NULL, LV_ALIGN_IN_TOP_LEFT, 0, 0);
-}
 
 static lv_group_t*  group;
 static lv_obj_t * tv;
@@ -133,91 +100,7 @@ static void msgbox_create(void)
     lv_obj_set_click(lv_layer_top(), true);
 }
 
-static void focus_cb(lv_group_t * group)
-{
-    lv_obj_t * obj = lv_group_get_focused(group);
-    if(obj != tv) {
-//        uint16_t tab = lv_tabview_get_tab_act(tv);
-//        switch(tab) {
-//            case 0:
-//                lv_page_focus(t1, obj, LV_ANIM_ON);
-//                break;
-//            case 1:
-//                lv_page_focus(t2, obj, LV_ANIM_ON);
-//                break;
-//            case 2:
-//                lv_page_focus(t3, obj, LV_ANIM_ON);
-//                break;
-//        }
-    }
-}
 
-
-static void event_handler(lv_obj_t * obj, lv_event_t event)
-{
-    if(event == LV_EVENT_VALUE_CHANGED) {
-        char buf[32];
-        lv_roller_get_selected_str(obj, buf, sizeof(buf));
-        ULOG_DEBUG("Selected month: %s\n", buf);
-    }
-}
-
-
-void lv_ex_roller_1(void)
-{
-    lv_obj_t *roller1 = lv_roller_create(lv_scr_act(), NULL);
-    lv_roller_set_options(roller1,
-                          "January\n"
-                          "February\n"
-                          "March\n"
-                          "April\n"
-                          "May\n"
-                          "June\n"
-                          "July\n"
-                          "August\n"
-                          "September\n"
-                          "October\n"
-                          "November\n"
-                          "December",
-                          LV_ROLLER_MODE_INFINITE);
-
-    lv_roller_set_visible_row_count(roller1, 3);
-    lv_obj_align(roller1, NULL, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_set_event_cb(roller1, event_handler);
-    lv_group_add_obj(group, roller1);
-}
-
-static lv_obj_t * slider_label;
-static void event_handler2(lv_obj_t * obj, lv_event_t event)
-{
-    if(event == LV_EVENT_VALUE_CHANGED) {
-        ULOG_DEBUG("Value: %d\n", lv_slider_get_value(obj));
-        static char buf[4];
-        snprintf(buf, 4, "%u", lv_slider_get_value(obj));
-        lv_label_set_text(slider_label, buf);
-    }
-}
-
-void lv_ex_slider_1(void)
-{
-    /*Create a slider*/
-    lv_obj_t * slider = lv_slider_create(lv_scr_act(), NULL);
-    lv_obj_align(slider, NULL, LV_ALIGN_CENTER, 0, 0);
-    lv_obj_set_event_cb(slider, event_handler2);
-
-    /* Create a label below the slider */
-    slider_label = lv_label_create(lv_scr_act(), NULL);
-    lv_label_set_text(slider_label, "0");
-    lv_obj_set_auto_realign(slider_label, true);
-    lv_obj_align(slider_label, slider, LV_ALIGN_OUT_BOTTOM_MID, 0, 15);
-
-    lv_group_add_obj(group, slider);
-
-    lv_obj_t * slider2 = lv_slider_create(lv_scr_act(), NULL);
-    lv_obj_align(slider2, NULL, LV_ALIGN_CENTER, 00, 10);
-    lv_obj_set_event_cb(slider2, event_handler2);
-    lv_group_add_obj(group, slider2);
-}
 
 static void event_handler_sw(lv_obj_t * obj, lv_event_t event)
 {
@@ -232,51 +115,8 @@ void Display_Init(void)
     HAL_GPIO_WritePin(LCD_EN_GPIO_PORT, LCD_EN_PIN, GPIO_PIN_SET);
     LCD_ST7735S_Init(&LCD_ST7735);
     LCD_ST7735S_Update();
-    lv_init();
 
-    static lv_disp_buf_t disp_buf;
-    static lv_color_t buf_1[LV_HOR_RES_MAX * 10];
-    lv_disp_buf_init(&disp_buf, buf_1, NULL, LV_HOR_RES_MAX * 10);
-
-
-    lv_disp_drv_t disp_drv;
-    disp_drv.hor_res = 160;
-    disp_drv.ver_res = 80;
-
-    lv_disp_drv_init(&disp_drv);
-    disp_drv.buffer = &disp_buf;
-    disp_drv.flush_cb = ST7735_flush;
-    lv_disp_drv_register(&disp_drv);
-
-    /** Register a keypad input device*/
-    lv_indev_drv_t indev_drv;
-
-    lv_indev_drv_init(&indev_drv);
-    indev_drv.type = LV_INDEV_TYPE_KEYPAD;
-    indev_drv.read_cb = keypad_read;
-    indev_keypad = lv_indev_drv_register(&indev_drv);
-
-    lv_tutorial_hello_world();
-    //lv_demo_keypad_encoder();
-
-    group = lv_group_create();
-    lv_group_set_focus_cb(group, focus_cb);
-
-    lv_indev_t* cur_drv = NULL;
-    while (1) {
-        cur_drv = lv_indev_get_next(cur_drv);
-        if (!cur_drv) {
-            break;
-        }
-
-        if (cur_drv->driver.type == LV_INDEV_TYPE_KEYPAD) {
-            lv_indev_set_group(cur_drv, group);
-        }
-    }
-
-    static lv_style_t style_modal;
-    lv_style_init(&style_modal);
-    lv_style_set_bg_color(&style_modal, LV_STATE_DEFAULT, LV_COLOR_BLACK);
+    gui_init();
 
 //    /* Create a button, then set its position and event callback */
 //    lv_obj_t *btn = lv_btn_create(lv_scr_act(), NULL);
@@ -296,23 +136,23 @@ void Display_Init(void)
 
 
 
-    msgbox_create();
+    //msgbox_create();
 
     //lv_ex_roller_1();
 
-    lv_ex_slider_1();
+    //lv_ex_slider_1();
 
 
-    /*Create a switch and apply the styles*/
-    lv_obj_t *sw1 = lv_switch_create(lv_scr_act(), NULL);
-    lv_obj_align(sw1, NULL, LV_ALIGN_IN_TOP_LEFT, 5, 15);
-    lv_obj_set_event_cb(sw1, event_handler_sw);
-    lv_group_add_obj(group, sw1);
+//    /*Create a switch and apply the styles*/
+//    lv_obj_t *sw1 = lv_switch_create(lv_scr_act(), NULL);
+//    lv_obj_align(sw1, NULL, LV_ALIGN_IN_TOP_LEFT, 5, 15);
+//    lv_obj_set_event_cb(sw1, event_handler_sw);
+//    lv_group_add_obj(group, sw1);
 
 
 }
 
-void Display_LoopService(void)
+void Display_Loop(void)
 {
     Power_Status_t *power = Power_GetStatus();
     Battery_status_t *battery = Battery_GetStatus();

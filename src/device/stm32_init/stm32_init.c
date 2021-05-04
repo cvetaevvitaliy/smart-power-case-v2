@@ -154,7 +154,7 @@ void MX_GPIO_Init(void)
     /*Configure GPIO pins : WKUP_Pin Button_5_Pin Button_4_Pin */
     GPIO_InitStruct.Pin = WKUP_PIN | BUTTON_5_PIN | BUTTON_4_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
     /*Configure GPIO pins : SPI1_CS_Pin USB_RESET_Pin */
@@ -182,7 +182,7 @@ void MX_GPIO_Init(void)
     /*Configure GPIO pin : Button_3_Pin */
     GPIO_InitStruct.Pin = BUTTON_3_PIN;
     GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Pull = GPIO_PULLDOWN;
     HAL_GPIO_Init(BUTTON_3_GPIO_PORT, &GPIO_InitStruct);
 
     /* EXTI interrupt init*/
@@ -496,6 +496,11 @@ void USB_Reset(void)
     HAL_Delay(200);
     HAL_GPIO_DeInit(GPIOA, GPIO_PIN_10);
 
+}
+
+RTC_HandleTypeDef *STM32_GetRtcHandle(void)
+{
+    return &hrtc;
 }
 
 /** RTC init function */

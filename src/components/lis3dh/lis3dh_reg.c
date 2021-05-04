@@ -2114,6 +2114,9 @@ int32_t lis3dh_tap_source_get(stmdev_ctx_t *ctx,
 /**
   * @brief  User-defined threshold value for Tap/Double Tap event.[set]
   *         1 LSB = full scale/128
+  * @Note   Adjust this number for the sensitivity of the 'click' force.
+  *         This strongly depends on the range!
+  *         For 16G, try 5-10; for 8G, try 10-20; for 4G, try 20-40; for 2G, try 40-80.
   *
   * @param  ctx      read / write interface definitions
   * @param  val      change the values of ths in reg CLICK_THS
@@ -2223,6 +2226,9 @@ int32_t lis3dh_tap_notification_mode_get(stmdev_ctx_t *ctx,
   * @brief  The maximum time (1 LSB = 1/ODR) interval that can elapse
   *         between the start of the click-detection procedure and when the
   *         acceleration falls back below the threshold.[set]
+  *         Time latency (default = 20). To convert to seconds divide by data rate.
+  *         For example, if the data rate is 400Hz,
+  *         then the default value of 20 is equivalent to a latency of 50 ms.
   *
   * @param  ctx      read / write interface definitions
   * @param  val      change the values of tli in reg TIME_LIMIT
@@ -2270,6 +2276,9 @@ int32_t lis3dh_shock_dur_get(stmdev_ctx_t *ctx, uint8_t *val)
   *         click detection where the click-detection procedure is
   *         disabled, in cases where the device is configured for
   *         double-click detection.[set]
+  *         Time limit (default = 10). To convert to seconds divide by data rate.
+  *         For example, if the data rate is 400Hz,
+  *         then the default value of 10 is equivalent to a time limit of 25 ms.
   *
   * @param  ctx      read / write interface definitions
   * @param  val      change the values of tla in reg TIME_LATENCY

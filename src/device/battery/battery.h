@@ -23,7 +23,7 @@ typedef struct
 
 void Battery_Init(void);
 
-void Battery_LoopService(void);
+void Battery_Loop(void);
 
 Battery_status_t *Battery_GetStatus(void);
 

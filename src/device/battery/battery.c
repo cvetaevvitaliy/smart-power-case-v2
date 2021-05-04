@@ -2,8 +2,11 @@
 #include "bq27441.h"
 #include "stm32f4xx.h"
 #include "cli.h"
+#include "gui_main_screen.h"
+#include "eeprom.h"
 
 extern I2C_HandleTypeDef hi2c1;
+static uint8_t tmp = 100;
 
 static Battery_status_t Battery_status = {0};
 
@@ -50,12 +53,16 @@ static BQ27441_ctx_t BQ27441 =
 
 void Battery_Init(void)
 {
+    eepromData_t *settings = eeprom_GetSettings();
+
     BQ27441_init(&BQ27441);
+    BQ27441_enterConfig (true);
+    BQ27441_setCapacity((uint16_t)settings->batMah);
+    BQ27441_exitConfig (true);
 }
 
-void Battery_LoopService(void)
+void Battery_Loop(void)
 {
-    static uint32_t tv_delay = 0;
 
     ULOG_TRACE("BQ27441 deviceType 0x%04X\n", BQ27441_deviceType());
     Battery_status.temperature = (float) BQ27441_temperature(BATTERY) / 100.0f;
@@ -71,21 +78,28 @@ void Battery_LoopService(void)
     Battery_status.charge_detect = BQ27441_fcFlag();
     Battery_status.fast_charge = BQ27441_chgFlag();
     Battery_status.battery_discharging = BQ27441_dsgFlag();
-    tv_delay = HAL_GetTick();
 
-    ULOG_TRACE("temperature: %.2f\n", Battery_status.temperature);
-    ULOG_TRACE("capacity: %d\n", Battery_status.capacity);
-    ULOG_TRACE("capacity_full: %d\n", Battery_status.capacity_full);
-    ULOG_TRACE("design_capacity: %d\n", Battery_status.design_capacity);
-    ULOG_TRACE("vbat: %.2f\n", Battery_status.vbat);
-    ULOG_TRACE("percent: %d\n", Battery_status.percent);
-    ULOG_TRACE("percent_unfiltered: %d\n", Battery_status.percent_unfiltered);
+    ULOG_TRACE("temperature: %.2f\r\n", Battery_status.temperature);
+    ULOG_TRACE("capacity: %dmAh\r\n", Battery_status.capacity);
+    ULOG_TRACE("capacity_full: %dmAh\r\n", Battery_status.capacity_full);
+    ULOG_TRACE("design_capacity: %dmAh\r\n", Battery_status.design_capacity);
+    ULOG_TRACE("vbat: %.2fV\r\n", Battery_status.vbat);
+    ULOG_TRACE("percent: %d%%\r\n", Battery_status.percent);
+    ULOG_TRACE("percent_unfiltered: %d%%\r\n", Battery_status.percent_unfiltered);
 
-    ULOG_TRACE("current: %d\n", Battery_status.current);
-    ULOG_TRACE("power: %d\n", Battery_status.power);
-    ULOG_TRACE("health: %d\n", Battery_status.health);
-    ULOG_TRACE("charge_detect: %d\n", Battery_status.charge_detect);
+    ULOG_TRACE("current: %dmA\r\n", Battery_status.current);
+    ULOG_TRACE("power: %dmW\r\n", Battery_status.power);
+    ULOG_TRACE("health: %d%%\r\n", Battery_status.health);
+    ULOG_TRACE("charge_detect: %d\r\n", Battery_status.charge_detect);
 
+    /** For test position different value to LCD screen*/
+    static uint8_t tmp = 100;
+    tmp--;
+
+    if (tmp == 0)
+        tmp = 100;
+
+    //Battery_status.percent = tmp;
 }
 
 Battery_status_t *Battery_GetStatus(void)

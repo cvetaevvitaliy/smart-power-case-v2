@@ -5,6 +5,8 @@
 #include "st7735s.h"
 #include "cli.h"
 #include "cmsis_os.h"
+#include "eeprom.h"
+#include "imu.h"
 
 extern I2C_HandleTypeDef hi2c1;
 static Power_Status_t Power_status = {0};
@@ -12,7 +14,7 @@ static Power_Status_t Power_status = {0};
 static int16_t _read_byte(uint8_t DevAddress, uint8_t *data, uint8_t reg)
 {
 
-  if(HAL_I2C_Mem_Read(&hi2c1, (uint16_t)DevAddress, reg,1, data,1,25)==HAL_OK)
+  if(HAL_I2C_Mem_Read(&hi2c1, (uint16_t)DevAddress, reg,1, data,1,25) == HAL_OK)
   {
     return BQ25895_OK;
   }
@@ -49,12 +51,16 @@ bool Power_InitChargerChip(void)
 
     if (bq2589x_init_device(&bq2589x) == BQ25895_OK)
     {
+        eepromData_t *settings = eeprom_GetSettings();
+        if (settings == NULL)
+            return false;
+
         bq2589x_exit_ship_mode();
         bq2589x_exit_hiz_mode();
-        bq2589x_set_charge_current(2000);
+        bq2589x_set_charge_current((uint16_t)settings->chargeCurrent);
         bq2589x_adc_start(false);
         bq2589x_set_prechg_current(1024);
-        bq2589x_set_bat_limit(2800);
+        bq2589x_set_bat_limit((uint16_t)settings->batMinVolt);
         bq2589x_set_chargevoltage(MAX_VOLTAGE_LIION); // +1mV drop on wires
         bq2589x_set_term_current(TAPER_CURRENT);
         bq2589x_enable_max_charge(true);
@@ -68,7 +74,7 @@ bool Power_InitChargerChip(void)
 
 }
 
-void Power_LoopService(void)
+void Power_Loop(void)
 {
     static uint32_t tv_delay = 0;
     static bool usb_enable = false;
@@ -93,34 +99,63 @@ void Power_LoopService(void)
             USB_Reset();
             HAL_Delay(200);
             MX_USB_DEVICE_Init();
-            //LCD_ST7735S_Clear();
-            //LCD_ST7735S_Draw_RGB_Bitmap(0, 0, &usb_to_pc);
-            //LCD_ST7735S_Update();
             HAL_Delay(2000);  /// need this time for reset and reinit USB
             cli_set_first_in_cli(false);
-            //LCD_ST7735S_Clear();
-            //LCD_ST7735S_Update();
-
         }
     }
     if (Power_status.vbus_type == BQ2589X_VBUS_NONE && usb_enable == true)
     {
         MX_USB_DEVICE_DeInit();
         usb_enable = false;
-        //LCD_ST7735S_Clear();
-        //LCD_ST7735_DrawString("USB disconnected",15,35, &Font_8x10, ST7735_WHITE);
-        //LCD_ST7735S_Update();
         HAL_Delay(2000);
         cli_set_first_in_cli(true);
-        //LCD_ST7735S_Clear();
-        //LCD_ST7735S_Update();
+#if 0
         bq2589x_enter_ship_mode();
         bq2589x_enter_hiz_mode();
+#endif
+    }
 
-//        PWR->CSR |= PWR_CSR_EWUP;
-//        PWR->CR  |= PWR_CR_CWUF;
-//        PWR->CR = PWR_CR_PDDS | PWR_CR_CWUF;
-//        HAL_PWR_EnterSTANDBYMode();
+
+}
+
+
+void Power_PowerOff(Power_Off_e type)
+{
+    // todo: need implement another power off
+    switch (type)
+    {
+        case POWER_OFF_ALL:
+            imu_PowerOff();
+            HAL_GPIO_WritePin(LCD_EN_GPIO_PORT, LCD_EN_PIN, GPIO_PIN_RESET);
+            bq2589x_enter_ship_mode();
+            bq2589x_enter_hiz_mode();
+            PWR->CSR |= PWR_CSR_EWUP;
+            PWR->CR |= PWR_CR_CWUF;
+            PWR->CR = PWR_CR_PDDS | PWR_CR_CWUF;
+            HAL_PWR_EnterSTANDBYMode();
+            break;
+
+        case POWER_OFF_MCU:
+            PWR->CSR |= PWR_CSR_EWUP;
+            PWR->CR |= PWR_CR_CWUF;
+            PWR->CR = PWR_CR_PDDS | PWR_CR_CWUF;
+            HAL_PWR_EnterSTANDBYMode();
+            break;
+
+        case POWER_OFF_LCD:
+            HAL_GPIO_WritePin(LCD_EN_GPIO_PORT, LCD_EN_PIN, GPIO_PIN_RESET);
+            break;
+
+        case POWER_OFF_ACC:
+            break;
+
+        case POWER_OFF_CHARGE_CHIP:
+            bq2589x_enter_ship_mode();
+            bq2589x_enter_hiz_mode();
+            break;
+
+        default:
+            break;
     }
 
 

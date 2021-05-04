@@ -48,12 +48,12 @@
 
 /* Default display refresh period.
  * Can be changed in the display driver (`lv_disp_drv_t`).*/
-#define LV_DISP_DEF_REFR_PERIOD      30      /*[ms]*/
+#define LV_DISP_DEF_REFR_PERIOD      25      /*[ms]*/
 
 /* Dot Per Inch: used to initialize default sizes.
  * E.g. a button with width = LV_DPI / 2 -> half inch wide
  * (Not so important, you can adjust it to modify default sizes and spaces)*/
-#define LV_DPI              45    /*[px]*/
+#define LV_DPI              40    /*[px]*/
 
 /* The the real width of the display changes some default values:
  * default object sizes, layout of examples, etc.
@@ -323,11 +323,11 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
  * LV_LOG_LEVEL_ERROR       Only critical issue, when the system may fail
  * LV_LOG_LEVEL_NONE        Do not log anything
  */
-#  define LV_LOG_LEVEL    LV_LOG_LEVEL_WARN
+#  define LV_LOG_LEVEL    LV_LOG_LEVEL_INFO
 
 /* 1: Print the log with 'printf';
  * 0: user need to register a callback with `lv_log_register_print_cb`*/
-#  define LV_LOG_PRINTF   0
+#  define LV_LOG_PRINTF   1
 #endif  /*LV_USE_LOG*/
 
 /*=================
@@ -385,13 +385,13 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
 #define LV_FONT_MONTSERRAT_10    1
 #define LV_FONT_MONTSERRAT_12    1
 #define LV_FONT_MONTSERRAT_14    1
-#define LV_FONT_MONTSERRAT_16    0
-#define LV_FONT_MONTSERRAT_18    0
-#define LV_FONT_MONTSERRAT_20    0
-#define LV_FONT_MONTSERRAT_22    0
-#define LV_FONT_MONTSERRAT_24    0
-#define LV_FONT_MONTSERRAT_26    0
-#define LV_FONT_MONTSERRAT_28    0
+#define LV_FONT_MONTSERRAT_16    1
+#define LV_FONT_MONTSERRAT_18    1
+#define LV_FONT_MONTSERRAT_20    1
+#define LV_FONT_MONTSERRAT_22    1
+#define LV_FONT_MONTSERRAT_24    1
+#define LV_FONT_MONTSERRAT_26    1
+#define LV_FONT_MONTSERRAT_28    1
 #define LV_FONT_MONTSERRAT_30    0
 #define LV_FONT_MONTSERRAT_32    0
 #define LV_FONT_MONTSERRAT_34    0
@@ -404,7 +404,7 @@ typedef void * lv_indev_drv_user_data_t;            /*Type of user data in the i
 #define LV_FONT_MONTSERRAT_48    0
 
 /* Demonstrate special features */
-#define LV_FONT_MONTSERRAT_12_SUBPX      0
+#define LV_FONT_MONTSERRAT_12_SUBPX      1
 #define LV_FONT_MONTSERRAT_28_COMPRESSED 0  /*bpp = 3*/
 #define LV_FONT_DEJAVU_16_PERSIAN_HEBREW 0  /*Hebrew, Arabic, PErisan letters and all their forms*/
 #define LV_FONT_SIMSUN_16_CJK            0  /*1000 most common CJK radicals*/
@@ -477,10 +477,8 @@ typedef void * lv_font_user_data_t;
 
 #define LV_THEME_DEFAULT_INCLUDE            <stdint.h>      /*Include a header for the init. function*/
 #define LV_THEME_DEFAULT_INIT               lv_theme_material_init
-#define LV_THEME_DEFAULT_COLOR_PRIMARY      lv_color_hex(0x01a2b1)
-#define LV_THEME_DEFAULT_COLOR_SECONDARY    lv_color_hex(0x44d1b6)
-//#define LV_THEME_DEFAULT_COLOR_PRIMARY      lv_color_hex(0xe54117) // red
-//#define LV_THEME_DEFAULT_COLOR_SECONDARY    lv_color_hex(0xd14444) // red
+#define LV_THEME_DEFAULT_COLOR_PRIMARY      LV_COLOR_RED
+#define LV_THEME_DEFAULT_COLOR_SECONDARY    LV_COLOR_BLACK
 #define LV_THEME_DEFAULT_FLAG               LV_THEME_MATERIAL_FLAG_LIGHT
 #define LV_THEME_DEFAULT_FONT_SMALL         &lv_font_montserrat_12
 #define LV_THEME_DEFAULT_FONT_NORMAL        &lv_font_montserrat_12

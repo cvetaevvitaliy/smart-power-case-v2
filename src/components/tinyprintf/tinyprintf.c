@@ -35,7 +35,7 @@
 
 #include "tinyprintf.h"
 #ifdef PRINTF_USB
-#include "printf_USB.h"
+#include "usbd_cdc_if.h"
 #endif
 
 
@@ -922,8 +922,5 @@ int fctprintf(void (*out)(char character, void* arg), void* arg, const char* for
 
 void _putchar(char character)
 {
-#ifdef PRINTF_USB
-    while (CDC_Receive_FS((uint8_t *) p_char, (uint32_t *) len) != USBD_OK) {}
-#endif
 
 }
